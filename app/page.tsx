@@ -4,13 +4,14 @@
 
 import { ChangeEvent, useEffect, useState } from "react";
 import { Download, ImagePlus, Loader2, Sparkles } from "lucide-react";
-import { LETTERING_STYLES, STYLE_PRESETS } from "@/lib/constants";
+import { FINAL_SITUATIONS, LETTERING_STYLES, MAX_SELECTED_SITUATIONS, MIN_SELECTED_SITUATIONS, STYLE_PRESETS } from "@/lib/constants";
 
 type ClientAsset = {
   id: string;
   kind: "preview" | "final";
   situationId: string;
   situationLabel: string;
+  displayText: string;
   typeId: "A" | "B" | "C";
   filename: string;
   url: string;
@@ -31,7 +32,7 @@ type ClientJob = {
 
 const statusText: Record<ClientJob["status"], string> = {
   queued: "작업 대기 중",
-  generating_final: "스케치를 분석하고 GIF 4개 생성 중",
+  generating_final: "스케치를 분석하고 GIF 생성 중",
   completed: "완료",
   failed: "실패"
 };
@@ -41,6 +42,7 @@ export default function Home() {
   const [previewUrl, setPreviewUrl] = useState<string>("");
   const [styleId, setStyleId] = useState<string>(STYLE_PRESETS[0].id);
   const [letteringStyleId, setLetteringStyleId] = useState<string>(LETTERING_STYLES[0].id);
+  const [selectedSituationIds, setSelectedSituationIds] = useState<string[]>([FINAL_SITUATIONS[0].id]);
   const [job, setJob] = useState<ClientJob | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
@@ -70,6 +72,10 @@ export default function Home() {
       setError("스케치 파일을 첨부해주세요.");
       return;
     }
+    if (selectedSituationIds.length < MIN_SELECTED_SITUATIONS || selectedSituationIds.length > MAX_SELECTED_SITUATIONS) {
+      setError(`이모지는 ${MIN_SELECTED_SITUATIONS}~${MAX_SELECTED_SITUATIONS}개까지 선택할 수 있습니다.`);
+      return;
+    }
 
     setBusy(true);
     setError("");
@@ -77,6 +83,7 @@ export default function Home() {
     formData.append("sketch", file);
     formData.append("styleId", styleId);
     formData.append("letteringStyleId", letteringStyleId);
+    selectedSituationIds.forEach((id) => formData.append("situationIds", id));
 
     const response = await fetch("/api/jobs", { method: "POST", body: formData });
     const data = await response.json();
@@ -90,8 +97,21 @@ export default function Home() {
     setJob(data.job);
   }
 
+  function toggleSituation(id: string) {
+    setError("");
+    setSelectedSituationIds((current) => {
+      if (current.includes(id)) {
+        if (current.length <= MIN_SELECTED_SITUATIONS) return current;
+        return current.filter((currentId) => currentId !== id);
+      }
+      if (current.length >= MAX_SELECTED_SITUATIONS) return current;
+      return [...current, id];
+    });
+  }
+
   const isGenerating = job?.status === "queued" || job?.status === "generating_final";
   const finalAssets = job?.finalAssets ?? [];
+  const selectedCount = selectedSituationIds.length;
 
   return (
     <main className="page">
@@ -101,7 +121,7 @@ export default function Home() {
           <h1>Imoji</h1>
         </div>
         <div className="steps">
-          {["스케치 업로드", "스타일 선택", "GIF 8개 생성", "ZIP 다운로드"].map((item, index) => (
+          {["스케치 업로드", "스타일 선택", "1~24개 선택 생성", "ZIP 다운로드"].map((item, index) => (
             <div className="step" key={item}>
               <span className="step-index">{index + 1}</span>
               <span>{item}</span>
@@ -160,9 +180,36 @@ export default function Home() {
                   </button>
                 ))}
               </div>
+              <div className="section-label">이모지 상황 선택</div>
+              <div className="selection-summary">
+                <span>
+                  {selectedCount}개 선택됨 / 최대 {MAX_SELECTED_SITUATIONS}개
+                </span>
+                <button
+                  className="text-button"
+                  type="button"
+                  onClick={() => setSelectedSituationIds(FINAL_SITUATIONS.map((situation) => situation.id))}
+                >
+                  전체 선택
+                </button>
+                <button className="text-button" type="button" onClick={() => setSelectedSituationIds([FINAL_SITUATIONS[0].id])}>
+                  기본 1개
+                </button>
+              </div>
+              <div className="situation-grid">
+                {FINAL_SITUATIONS.map((situation) => {
+                  const checked = selectedSituationIds.includes(situation.id);
+                  return (
+                    <label className={`situation-option ${checked ? "active" : ""}`} key={situation.id}>
+                      <input type="checkbox" checked={checked} onChange={() => toggleSituation(situation.id)} />
+                      <span>{situation.label}</span>
+                    </label>
+                  );
+                })}
+              </div>
               <div className="actions">
                 <button className="primary" type="button" disabled={busy} onClick={createGenerationJob}>
-                  {busy ? "시작 중" : "GIF 4개 생성"}
+                  {busy ? "시작 중" : `GIF ${selectedCount}개 생성`}
                 </button>
               </div>
               {error ? <div className="error">{error}</div> : null}
@@ -176,7 +223,7 @@ export default function Home() {
               <div>
                 <strong>{statusText[job.status]}</strong>
                 <p className="status">
-                  첨부 스케치를 Gemini Vision으로 분석한 뒤 상황별 스프라이트 GIF를 생성합니다. 이 화면은 자동으로 갱신됩니다.
+                  첨부 스케치를 Gemini Vision으로 분석한 뒤 선택한 {job.finalCount}개 상황의 스프라이트 GIF를 생성합니다. 이 화면은 자동으로 갱신됩니다.
                 </p>
               </div>
             )}
@@ -186,9 +233,9 @@ export default function Home() {
                 <div className="asset-grid result-grid">
                   {finalAssets.map((asset) => (
                     <div className="asset-card" key={asset.id}>
-                      <img src={asset.url} alt={asset.situationLabel} />
+                      <img src={asset.url} alt={asset.displayText} />
                       <div className="asset-meta">
-                        <span>{asset.situationLabel}</span>
+                        <span>{asset.situationLabel} · {asset.displayText}</span>
                         <span>GIF</span>
                       </div>
                     </div>

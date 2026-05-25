@@ -24,13 +24,22 @@ export async function analyzeCharacterProfile(imagePath: string, mimeType: strin
       },
       {
         text: [
-          "Analyze this user-uploaded hand-drawn sketch for an emoticon generator.",
-          "Return a concise English character profile for image generation.",
-          "Focus only on visually observable traits:",
-          "silhouette, body shape, face, eyes, mouth, proportions, line quality, pose, accessories, and unique handmade quirks.",
-          "Explicitly list what must be preserved so the generated emoticon still looks like this exact drawing.",
-          "Do not invent a backstory. Do not describe the background. Do not mention uncertainty.",
-          "Keep it under 900 characters."
+          "Analyze this user-uploaded hand-drawn sketch as a reference for emoticon generation.",
+          "Return a detailed English character profile focused ONLY on PRESERVING this exact drawing.",
+          "List observable visual traits that make this character unique and must be preserved:",
+          "- Exact silhouette outline and body proportions",
+          "- Face shape, eye placement, eye shape, pupil direction",
+          "- Mouth shape and expression",
+          "- Facial asymmetry, quirks, and hand-drawn imperfections",
+          "- Head-to-body ratio and limb proportions",
+          "- Posture and stance",
+          "- Any distinctive accessories, marks, or details",
+          "- Line quality and sketch style (rough vs clean, thick vs thin)",
+          "CRITICAL: This profile is used to ensure ALL generated emoticons look like the SAME CHARACTER.",
+          "Do not suggest design improvements or variations.",
+          "Do not mention the background or context.",
+          "Do not add personality description beyond visual traits.",
+          "Keep the profile under 1000 characters and format as a clear, scannable list."
         ].join(" ")
       }
     ]

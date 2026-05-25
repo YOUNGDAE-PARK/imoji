@@ -1,3 +1,5 @@
+import situationData from "../data/situations.json";
+
 export const STYLE_PRESETS = [
   { id: "soft-sticker", label: "말랑 2D 스티커", prompt: "soft rounded 2D sticker, warm colors, clean readable silhouette" },
   { id: "clean-line", label: "깔끔한 라인 캐릭터", prompt: "clean line character, minimal polished vector-like drawing" },
@@ -7,12 +9,21 @@ export const STYLE_PRESETS = [
   { id: "pixel", label: "픽셀 아트 이모티콘", prompt: "pixel art emoticon, crisp low-resolution pixel style, readable at small size" }
 ] as const;
 
-export const FINAL_SITUATIONS = [
-  { id: "hello", label: "안녕", prompt: "cheerfully waving hello" },
-  { id: "love", label: "좋아해", prompt: "sweet affectionate heart gesture, shy happy expression" },
-  { id: "surprised", label: "깜짝", prompt: "cute surprised reaction with wide eyes and lively pose" },
-  { id: "laugh", label: "ㅋㅋㅋ", prompt: "laughing happily, playful body bounce, joyful expression" }
-] as const;
+export type FinalSituation = {
+  id: string;
+  label: string;
+  prompt: string;
+  animationPrompt: string;
+  motionPreset: string;
+  textVariants: string[];
+  frames: string[];
+};
+
+export const FINAL_SITUATIONS = situationData.situations as FinalSituation[];
+export const GIF_FRAME_COUNT = 16;
+
+export const MIN_SELECTED_SITUATIONS = 1;
+export const MAX_SELECTED_SITUATIONS = FINAL_SITUATIONS.length;
 
 export const LETTERING_STYLES = [
   {

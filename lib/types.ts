@@ -7,6 +7,7 @@ export type GeneratedAsset = {
   kind: AssetKind;
   situationId: string;
   situationLabel: string;
+  displayText: string;
   typeId: "A" | "B" | "C";
   filename: string;
   path: string;
@@ -20,6 +21,7 @@ export type GenerationJob = {
   letteringStyleId: string;
   letteringStyleLabel: string;
   letteringStylePrompt: string;
+  selectedSituationIds: string[];
   uploadPath: string;
   uploadMimeType: string;
   characterProfile?: string;

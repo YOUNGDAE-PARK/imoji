@@ -1,0 +1,725 @@
+{
+  "version": 1,
+  "situations": [
+    {
+      "id": "hello",
+      "label": "안녕",
+      "textVariants": [
+        "안뇽!",
+        "왔어?",
+        "하이하이"
+      ],
+      "prompt": "cheerfully waving hello with raised arm",
+      "animationPrompt": "one arm raised waist-high, hand waving side-to-side with bright friendly expression",
+      "motionPreset": "wave",
+      "frames": [
+        "neutral resting pose with both arms at sides, friendly face, ready to wave",
+        "left arm lifts up toward shoulder height, slight lean forward",
+        "arm reaches waist height, hand begins wave motion to the left",
+        "hand waves left, wrist rotates, clear side-to-side motion",
+        "hand waves right to center, wrist continues clear motion, arm stays raised",
+        "hand waves right, full extension of wave, wrist bends",
+        "hand waves back left, wrist still bent, wave motion peaks",
+        "hand at center height, wave motion holds visible for readability",
+        "hand pauses at center height, wrist slightly bent, hold the wave position",
+        "hand begins to lower and settle, wrist straightens gradually",
+        "hand lowers to waist height, arm follows down smoothly",
+        "arm lowers toward hip, wave motion complete",
+        "arm returns to side, nearly back to rest pose",
+        "arm nearly at rest, tiny remaining motion settling",
+        "both arms at sides, return to exact rest pose from frame 1",
+        "final frame matches frame 1 exactly, no position shift, ready for loop"
+      ]
+    },
+    {
+      "id": "love",
+      "label": "좋아해",
+      "textVariants": [
+        "내 맘 알지",
+        "두근두근",
+        "너 좀 좋다"
+      ],
+      "prompt": "making heart shape with hands or sweet affectionate gesture",
+      "animationPrompt": "hands form heart shape at chest, shy happy expression, small flutter motion",
+      "motionPreset": "pop",
+      "frames": [
+        "neutral resting pose, both hands at sides, soft gentle face",
+        "hands lift toward chest level, fingers begin positioning",
+        "hands move to chest height, fingers start curving into heart shape",
+        "hands form clearer heart outline at chest center, slight compression",
+        "hands squeeze into full heart shape at chest, peak compression starting",
+        "heart shape fully formed and held at chest center, small scale pulse",
+        "heart shape maintains at chest, pulse motion visible, flutter gesture",
+        "heart shape peaks with slight expansion, flutter at maximum",
+        "heart shape holds peak position steady for readability",
+        "hands begin to relax from heart shape slightly",
+        "hands loosen from heart shape, fingers straighten gradually",
+        "hands open from heart shape, moving downward",
+        "hands lower back to sides, near rest position",
+        "hands almost fully at sides, tiny remaining motion",
+        "both hands at sides, exact rest pose from frame 1",
+        "final frame matches frame 1 exactly, ready for smooth loop"
+      ]
+    },
+    {
+      "id": "surprised",
+      "label": "깜짝",
+      "textVariants": [
+        "헉!",
+        "깜놀",
+        "어머?"
+      ],
+      "prompt": "sudden surprise with wide open eyes, mouth O-shaped, startled body recoil",
+      "animationPrompt": "sudden recoil backward with wide shocked eyes and jerky body movement",
+      "motionPreset": "recoil",
+      "frames": [
+        "neutral resting pose, calm normal expression, body centered",
+        "tiny flinch backward, eyes beginning to widen, first shock impulse",
+        "body recoils back, eyes wider, mouth opens O-shape, shoulders raise up",
+        "maximum recoil backward, eyes wide open, surprised expression peaks",
+        "eyes at maximum width with shocked expression locked, body jolted",
+        "body begins recovery from recoil, eyes still wide but expression stabilizes",
+        "slow recoil return forward, eyes stay wide, expression remains surprised",
+        "body returns closer to center position, eyes hold wide expression for clarity",
+        "body settles nearly back to rest position, eyes still wide but held steady",
+        "eyes begin to normalize from wide open state",
+        "eyes continue to relax back to normal size, body still centered",
+        "eyes nearly back to normal, final recovery in progress",
+        "eyes fully back to normal, body returns to rest pose",
+        "body almost exactly at rest, tiny remaining motion",
+        "both arms at sides, exact rest pose from frame 1",
+        "final frame matches frame 1 exactly, ready for loop"
+      ]
+    },
+    {
+      "id": "laugh",
+      "label": "ㅋㅋㅋ",
+      "textVariants": [
+        "ㅋㅋㅋ",
+        "빵터짐",
+        "웃참 실패"
+      ],
+      "prompt": "laughing happily with open mouth, joyful bouncy body movement",
+      "animationPrompt": "big laughing bounce with wide-open mouth smile and rhythmic up-down movement",
+      "motionPreset": "bounce",
+      "frames": [
+        "neutral resting pose with both arms at sides, calm normal expression",
+        "tiny anticipation, body settles low slightly, happy expression beginning",
+        "body bounces up, mouth opens into smile, laugh expression shows",
+        "bounce continues up, mouth open wide, joyful energy building",
+        "body reaches peak of bounce, mouth wide open laugh, arms may lift",
+        "bounce peaks with maximum happy expression, mouth wide open at peak",
+        "body begins descent from bounce peak while laughing, expression held",
+        "body descends, laugh still visible, mouth open, motion smooth",
+        "body settles to center, laugh expression holds steady for readability",
+        "body continues settling, laugh begins to relax slightly",
+        "body nearly at rest, laugh expression relaxes more",
+        "body almost fully settled, expression becoming neutral",
+        "body fully at rest position, expression nearly neutral",
+        "arms at sides, tiny remaining settling motion",
+        "neutral expression, exact rest pose from frame 1",
+        "final frame matches frame 1 exactly, ready for loop"
+      ]
+    },
+    {
+      "id": "thanks",
+      "label": "고마워",
+      "textVariants": [
+        "감동이야",
+        "고마워잉",
+        "덕분에 살았다"
+      ],
+      "prompt": "grateful bow or clasped hands at chest, warm grateful smile",
+      "animationPrompt": "thankful bow with hands clasped at chest and warm grateful expression",
+      "motionPreset": "bow",
+      "frames": [
+        "neutral resting pose with both hands at sides, warm smile, centered upright",
+        "tiny anticipation, hands begin to clasp together",
+        "hands clasp at chest level, gentle bowing motion starts",
+        "hands clasped firmly at chest, body begins forward bow",
+        "bow deepens, hands held at chest center, grateful expression peaks",
+        "bow at maximum depth with hands clasped at center chest, grateful expression steady",
+        "body begins to rise from bow, hands still clasped",
+        "body rises up from bow position, hands begin to lower",
+        "body nearly upright from bow, hands separate and lower",
+        "body fully upright, hands returning to sides, grateful smile still visible",
+        "hands almost at sides, warm expression lingering",
+        "hands fully at sides, grateful expression relaxing",
+        "body fully at rest, neutral warm posture",
+        "arms at sides, tiny remaining settling",
+        "exact rest pose from frame 1, warm neutral expression",
+        "final frame matches frame 1 exactly, ready for loop"
+      ]
+    },
+    {
+      "id": "sorry",
+      "label": "미안",
+      "textVariants": [
+        "머쓱...",
+        "미안해잉",
+        "내가 잘못"
+      ],
+      "prompt": "apologetic small bow with embarrassed face, regretful expression",
+      "animationPrompt": "apologetic bow with ashamed embarrassed face and small humble movement",
+      "motionPreset": "bow",
+      "frames": [
+        "neutral resting pose with arms at sides, neutral expression, centered upright",
+        "tiny anticipation, shoulders shrug slightly upward, embarrassed expression begins",
+        "head bows down slightly, embarrassed apologetic face shows",
+        "body bows forward with humble posture, ashamed expression clear",
+        "bow deepens slightly, regretful expression at maximum, held for readability",
+        "bow held at modest depth, apologetic expression steady and sincere",
+        "body begins to rise from bow slowly, embarrassed expression still visible",
+        "body rises gradually from bow, shy apologetic look lingers",
+        "body nearly upright from bow, embarrassed expression beginning to fade",
+        "body fully upright, ashamed expression relaxing gradually",
+        "posture fully upright, expression becoming more neutral",
+        "neutral posture restored, expression nearly neutral but still slightly sheepish",
+        "body at rest position, neutral expression",
+        "arms at sides, tiny remaining motion",
+        "exact rest pose from frame 1, neutral expression",
+        "final frame matches frame 1 exactly, ready for loop"
+      ]
+    },
+    {
+      "id": "congrats",
+      "label": "축하",
+      "textVariants": [
+        "대박 축하!",
+        "꽃길만!",
+        "잔치다"
+      ],
+      "prompt": "celebrating with raised arms or jump, joyful festive expression",
+      "animationPrompt": "celebration jump or arm raise with bright festive joyful energy",
+      "motionPreset": "jump",
+      "frames": [
+        "neutral resting pose with both arms at sides, neutral calm expression",
+        "tiny anticipation, arms begin to lift, happy expression shows",
+        "arms lift toward shoulder height, body prep for jump or lift",
+        "arms lift to shoulder level or above, bright celebratory expression",
+        "arms reach peak height raised, body appears lifted, joyful energy peaks",
+        "arms held high with celebratory pose, bright expression steady for clarity",
+        "arms begin to lower gradually, celebratory expression maintained",
+        "arms continue lowering, bright festive feeling still visible",
+        "arms return toward sides, celebration expression begins to ease",
+        "arms nearly at sides, joyful expression softening",
+        "arms at sides, expression becoming more neutral",
+        "fully settled posture, calm expression nearly neutral",
+        "body at complete rest, neutral expression",
+        "arms fully at sides, tiny remaining motion",
+        "exact rest pose from frame 1, calm neutral expression",
+        "final frame matches frame 1 exactly, ready for loop"
+      ]
+    },
+    {
+      "id": "best",
+      "label": "최고",
+      "textVariants": [
+        "역시 최고",
+        "엄지척",
+        "폼 미쳤다"
+      ],
+      "prompt": "thumbs up or proud confident gesture, bright smile",
+      "animationPrompt": "confident thumbs-up pops forward with proud bright expression",
+      "motionPreset": "pop",
+      "frames": [
+        "rest pose for confident thumbs-up pops forward with proud bright expression; prepare for one soft pop-and-settle gesture",
+        "tiny anticipation only; same character begins one soft pop-and-settle gesture",
+        "start one soft pop-and-settle gesture; very small movement from frame 2",
+        "continue one soft pop-and-settle gesture; smooth incremental change, no new gesture",
+        "build one soft pop-and-settle gesture; keep the same anchor and silhouette",
+        "build one soft pop-and-settle gesture a little more; neighboring frames must connect",
+        "approach the peak of one soft pop-and-settle gesture; still one continuous motion",
+        "reach the clean peak of one soft pop-and-settle gesture; no extra pose or prop",
+        "hold the same peak for readability; minimal motion only",
+        "begin soft rebound from the peak of one soft pop-and-settle gesture",
+        "continue the rebound; return along the same motion path",
+        "follow through gently; no second action begins",
+        "settle close to the original rest pose",
+        "almost back to frame 1; tiny remaining motion",
+        "return to the loop start pose; match frame 1 closely",
+        "final loop-back frame; visually connects to frame 1 without a jump"
+      ]
+    },
+    {
+      "id": "cheer-up",
+      "label": "힘내",
+      "textVariants": [
+        "할 수 있다!",
+        "기운 내",
+        "내가 응원해"
+      ],
+      "prompt": "encouraging energetic pose, supportive cheering expression",
+      "animationPrompt": "supportive cheering pump with energetic encouragement",
+      "motionPreset": "bounce",
+      "frames": [
+        "rest pose for supportive cheering pump with energetic encouragement; prepare for one rhythmic body bounce",
+        "tiny anticipation only; same character begins one rhythmic body bounce",
+        "start one rhythmic body bounce; very small movement from frame 2",
+        "continue one rhythmic body bounce; smooth incremental change, no new gesture",
+        "build one rhythmic body bounce; keep the same anchor and silhouette",
+        "build one rhythmic body bounce a little more; neighboring frames must connect",
+        "approach the peak of one rhythmic body bounce; still one continuous motion",
+        "reach the clean peak of one rhythmic body bounce; no extra pose or prop",
+        "hold the same peak for readability; minimal motion only",
+        "begin soft rebound from the peak of one rhythmic body bounce",
+        "continue the rebound; return along the same motion path",
+        "follow through gently; no second action begins",
+        "settle close to the original rest pose",
+        "almost back to frame 1; tiny remaining motion",
+        "return to the loop start pose; match frame 1 closely",
+        "final loop-back frame; visually connects to frame 1 without a jump"
+      ]
+    },
+    {
+      "id": "good-night",
+      "label": "잘자",
+      "textVariants": [
+        "꿈에서 봐",
+        "포근한 밤",
+        "이불 속으로"
+      ],
+      "prompt": "sleepy cozy good night mood, gentle relaxed expression",
+      "animationPrompt": "cozy sleepy nod and soft good-night gesture",
+      "motionPreset": "droop",
+      "frames": [
+        "rest pose for cozy sleepy nod and soft good-night gesture; prepare for one slow droop and lift back",
+        "tiny anticipation only; same character begins one slow droop and lift back",
+        "start one slow droop and lift back; very small movement from frame 2",
+        "continue one slow droop and lift back; smooth incremental change, no new gesture",
+        "build one slow droop and lift back; keep the same anchor and silhouette",
+        "build one slow droop and lift back a little more; neighboring frames must connect",
+        "approach the peak of one slow droop and lift back; still one continuous motion",
+        "reach the clean peak of one slow droop and lift back; no extra pose or prop",
+        "hold the same peak for readability; minimal motion only",
+        "begin soft rebound from the peak of one slow droop and lift back",
+        "continue the rebound; return along the same motion path",
+        "follow through gently; no second action begins",
+        "settle close to the original rest pose",
+        "almost back to frame 1; tiny remaining motion",
+        "return to the loop start pose; match frame 1 closely",
+        "final loop-back frame; visually connects to frame 1 without a jump"
+      ]
+    },
+    {
+      "id": "hungry",
+      "label": "배고파",
+      "textVariants": [
+        "밥 생각뿐",
+        "꼬르륵",
+        "뭐 먹지?"
+      ],
+      "prompt": "hungry pleading expression with hand clutching stomach, drooling mouth",
+      "animationPrompt": "hungry stomach-clutch plead with desperate food-wanting gesture",
+      "motionPreset": "plead",
+      "frames": [
+        "neutral rest pose with arms at sides, neutral expression, centered",
+        "tiny anticipation, hand rises toward belly, pleading expression shows",
+        "hand clutches at stomach area, pleading face and body forward lean begin",
+        "body leans forward with hand at belly, hungry pleading expression peaks",
+        "body forward lean continues, hand clutches belly, hungry expression held",
+        "body leans further, hand grips belly, desperate hungry look maximum",
+        "body begins to straighten from lean, hand still clutching belly",
+        "body rises from forward lean, hand begins to lower from belly",
+        "body nearly upright, hand leaving belly area, hungry expression softening",
+        "body upright, hand returning to side, expression becoming neutral",
+        "hand approaching rest position, neutral expression returning",
+        "arm fully at side, expression nearly neutral",
+        "both arms at rest, neutral expression",
+        "full rest position, tiny remaining motion",
+        "exact rest pose from frame 1, calm neutral",
+        "final frame matches frame 1 exactly, ready for loop"
+      ]
+    },
+    {
+      "id": "sleepy",
+      "label": "졸려",
+      "textVariants": [
+        "눈꺼풀 무거움",
+        "꾸벅꾸벅",
+        "잠이 솔솔"
+      ],
+      "prompt": "drowsy yawning with half-closed tired eyes, slow head droop",
+      "animationPrompt": "slow yawning head nod downward with sleepy drooping body",
+      "motionPreset": "droop",
+      "frames": [
+        "neutral upright rest pose, alert normal eyes, arms at sides",
+        "tiny anticipation, eyes begin to droop half-closed, yawn mouth opens",
+        "head droops forward slightly, eyes closing to sleepy half-lidded state",
+        "head droops down more, mouth wide open yawning, sleepy expression clear",
+        "head at maximum droop forward, wide yawn visible, very drowsy expression",
+        "head held at droop peak with yawn, sleepy half-closed eyes, expression held",
+        "head begins to rise from droop slowly, yawn closes, eyes still sleepy",
+        "head rises back up gradually, mouth closes from yawn, eyes droopy",
+        "head nearly upright, eyes still half-closed sleepy, yawn over",
+        "head fully upright, eyes begin to open back to normal",
+        "eyes nearly back to normal alert, sleepy expression fading",
+        "eyes fully open normal, drowsy expression gone",
+        "fully alert rest pose, wide awake eyes",
+        "arms at sides, tiny remaining settling",
+        "exact rest pose from frame 1, alert neutral expression",
+        "final frame matches frame 1 exactly, ready for loop"
+      ]
+    },
+    {
+      "id": "angry",
+      "label": "화남",
+      "textVariants": [
+        "부글부글",
+        "참는 중",
+        "열 받음"
+      ],
+      "prompt": "cute angry reaction with puffed cheeks, furrowed brow, foot stomp",
+      "animationPrompt": "angry side-to-side shake with puffed cheeks and stomping mood",
+      "motionPreset": "shake",
+      "frames": [
+        "neutral rest pose, calm normal expression, centered upright",
+        "tiny anticipation, angry expression beginning, cheeks puff slightly",
+        "body shakes left, angry frown clear, puffed cheeks visible, feet shift",
+        "body shakes right from left, angry expression peaks, puffed cheeks held",
+        "body shakes back left more vigorously, furious puffed expression locked",
+        "shake continues right, angry expression maximum intensity, held for clarity",
+        "shake continuing but beginning to settle, angry expression persists",
+        "shake lessens, body settling, anger expression gradually calming",
+        "shake nearly stopped, angry expression beginning to fade",
+        "body nearly at rest, angry look softening gradually",
+        "body at rest position, expression becoming more neutral",
+        "fully settled, expression nearly neutral",
+        "complete rest pose, calm neutral expression",
+        "arms at sides, tiny remaining motion",
+        "exact rest pose from frame 1, calm neutral",
+        "final frame matches frame 1 exactly, ready for loop"
+      ]
+    },
+    {
+      "id": "sad",
+      "label": "슬픔",
+      "textVariants": [
+        "마상...",
+        "오늘 좀 흐림",
+        "축 처짐"
+      ],
+      "prompt": "sad drooping pose, downcast expression",
+      "animationPrompt": "sad slump with head and shoulders drooping downward",
+      "motionPreset": "droop",
+      "frames": [
+        "rest pose for sad slump with head and shoulders drooping downward; prepare for one slow droop and lift back",
+        "tiny anticipation only; same character begins one slow droop and lift back",
+        "start one slow droop and lift back; very small movement from frame 2",
+        "continue one slow droop and lift back; smooth incremental change, no new gesture",
+        "build one slow droop and lift back; keep the same anchor and silhouette",
+        "build one slow droop and lift back a little more; neighboring frames must connect",
+        "approach the peak of one slow droop and lift back; still one continuous motion",
+        "reach the clean peak of one slow droop and lift back; no extra pose or prop",
+        "hold the same peak for readability; minimal motion only",
+        "begin soft rebound from the peak of one slow droop and lift back",
+        "continue the rebound; return along the same motion path",
+        "follow through gently; no second action begins",
+        "settle close to the original rest pose",
+        "almost back to frame 1; tiny remaining motion",
+        "return to the loop start pose; match frame 1 closely",
+        "final loop-back frame; visually connects to frame 1 without a jump"
+      ]
+    },
+    {
+      "id": "tears",
+      "label": "눈물",
+      "textVariants": [
+        "눈물 버튼 ON",
+        "또르륵",
+        "수분 폭발"
+      ],
+      "prompt": "crying with large comic tears, overwhelmed expression",
+      "animationPrompt": "comic crying burst with tears growing across frames",
+      "motionPreset": "shake",
+      "frames": [
+        "rest pose for comic crying burst with tears growing across frames; prepare for one short side-to-side shake",
+        "tiny anticipation only; same character begins one short side-to-side shake",
+        "start one short side-to-side shake; very small movement from frame 2",
+        "continue one short side-to-side shake; smooth incremental change, no new gesture",
+        "build one short side-to-side shake; keep the same anchor and silhouette",
+        "build one short side-to-side shake a little more; neighboring frames must connect",
+        "approach the peak of one short side-to-side shake; still one continuous motion",
+        "reach the clean peak of one short side-to-side shake; no extra pose or prop",
+        "hold the same peak for readability; minimal motion only",
+        "begin soft rebound from the peak of one short side-to-side shake",
+        "continue the rebound; return along the same motion path",
+        "follow through gently; no second action begins",
+        "settle close to the original rest pose",
+        "almost back to frame 1; tiny remaining motion",
+        "return to the loop start pose; match frame 1 closely",
+        "final loop-back frame; visually connects to frame 1 without a jump"
+      ]
+    },
+    {
+      "id": "ok",
+      "label": "OK",
+      "textVariants": [
+        "오케이!",
+        "접수완",
+        "좋아 진행"
+      ],
+      "prompt": "clear ok hand sign or affirmative nod, confident expression",
+      "animationPrompt": "affirmative OK gesture with nodding confidence",
+      "motionPreset": "nod",
+      "frames": [
+        "rest pose for affirmative OK gesture with nodding confidence; prepare for one clear nod and return",
+        "tiny anticipation only; same character begins one clear nod and return",
+        "start one clear nod and return; very small movement from frame 2",
+        "continue one clear nod and return; smooth incremental change, no new gesture",
+        "build one clear nod and return; keep the same anchor and silhouette",
+        "build one clear nod and return a little more; neighboring frames must connect",
+        "approach the peak of one clear nod and return; still one continuous motion",
+        "reach the clean peak of one clear nod and return; no extra pose or prop",
+        "hold the same peak for readability; minimal motion only",
+        "begin soft rebound from the peak of one clear nod and return",
+        "continue the rebound; return along the same motion path",
+        "follow through gently; no second action begins",
+        "settle close to the original rest pose",
+        "almost back to frame 1; tiny remaining motion",
+        "return to the loop start pose; match frame 1 closely",
+        "final loop-back frame; visually connects to frame 1 without a jump"
+      ]
+    },
+    {
+      "id": "nope",
+      "label": "싫어",
+      "textVariants": [
+        "그건 좀...",
+        "놉!",
+        "마음이 닫힘"
+      ],
+      "prompt": "refusing or shaking head, cute firm expression",
+      "animationPrompt": "firm refusal with head shake and crossed arms or blocking hand",
+      "motionPreset": "shake",
+      "frames": [
+        "rest pose for firm refusal with head shake and crossed arms or blocking hand; prepare for one short side-to-side shake",
+        "tiny anticipation only; same character begins one short side-to-side shake",
+        "start one short side-to-side shake; very small movement from frame 2",
+        "continue one short side-to-side shake; smooth incremental change, no new gesture",
+        "build one short side-to-side shake; keep the same anchor and silhouette",
+        "build one short side-to-side shake a little more; neighboring frames must connect",
+        "approach the peak of one short side-to-side shake; still one continuous motion",
+        "reach the clean peak of one short side-to-side shake; no extra pose or prop",
+        "hold the same peak for readability; minimal motion only",
+        "begin soft rebound from the peak of one short side-to-side shake",
+        "continue the rebound; return along the same motion path",
+        "follow through gently; no second action begins",
+        "settle close to the original rest pose",
+        "almost back to frame 1; tiny remaining motion",
+        "return to the loop start pose; match frame 1 closely",
+        "final loop-back frame; visually connects to frame 1 without a jump"
+      ]
+    },
+    {
+      "id": "please",
+      "label": "부탁",
+      "textVariants": [
+        "제발요",
+        "한 번만",
+        "부탁해잉"
+      ],
+      "prompt": "pleading request pose, clasped hands and hopeful eyes",
+      "animationPrompt": "pleading clasped-hands request with hopeful bounce",
+      "motionPreset": "plead",
+      "frames": [
+        "rest pose for pleading clasped-hands request with hopeful bounce; prepare for one small pleading lean forward and return",
+        "tiny anticipation only; same character begins one small pleading lean forward and return",
+        "start one small pleading lean forward and return; very small movement from frame 2",
+        "continue one small pleading lean forward and return; smooth incremental change, no new gesture",
+        "build one small pleading lean forward and return; keep the same anchor and silhouette",
+        "build one small pleading lean forward and return a little more; neighboring frames must connect",
+        "approach the peak of one small pleading lean forward and return; still one continuous motion",
+        "reach the clean peak of one small pleading lean forward and return; no extra pose or prop",
+        "hold the same peak for readability; minimal motion only",
+        "begin soft rebound from the peak of one small pleading lean forward and return",
+        "continue the rebound; return along the same motion path",
+        "follow through gently; no second action begins",
+        "settle close to the original rest pose",
+        "almost back to frame 1; tiny remaining motion",
+        "return to the loop start pose; match frame 1 closely",
+        "final loop-back frame; visually connects to frame 1 without a jump"
+      ]
+    },
+    {
+      "id": "wait",
+      "label": "기다려",
+      "textVariants": [
+        "잠깐만",
+        "기다려줘",
+        "로딩 중"
+      ],
+      "prompt": "hold-on gesture, one hand raised to pause",
+      "animationPrompt": "urgent hold-on pause gesture with raised hand",
+      "motionPreset": "stop",
+      "frames": [
+        "rest pose for urgent hold-on pause gesture with raised hand; prepare for one gentle stop gesture push and return",
+        "tiny anticipation only; same character begins one gentle stop gesture push and return",
+        "start one gentle stop gesture push and return; very small movement from frame 2",
+        "continue one gentle stop gesture push and return; smooth incremental change, no new gesture",
+        "build one gentle stop gesture push and return; keep the same anchor and silhouette",
+        "build one gentle stop gesture push and return a little more; neighboring frames must connect",
+        "approach the peak of one gentle stop gesture push and return; still one continuous motion",
+        "reach the clean peak of one gentle stop gesture push and return; no extra pose or prop",
+        "hold the same peak for readability; minimal motion only",
+        "begin soft rebound from the peak of one gentle stop gesture push and return",
+        "continue the rebound; return along the same motion path",
+        "follow through gently; no second action begins",
+        "settle close to the original rest pose",
+        "almost back to frame 1; tiny remaining motion",
+        "return to the loop start pose; match frame 1 closely",
+        "final loop-back frame; visually connects to frame 1 without a jump"
+      ]
+    },
+    {
+      "id": "busy",
+      "label": "바쁨",
+      "textVariants": [
+        "정신없음",
+        "손이 모자라",
+        "바빠바빠"
+      ],
+      "prompt": "busy hurried motion, focused flustered expression",
+      "animationPrompt": "hurried busy movement with flustered body shake",
+      "motionPreset": "rush",
+      "frames": [
+        "rest pose for hurried busy movement with flustered body shake; prepare for one hurried lean forward and settle",
+        "tiny anticipation only; same character begins one hurried lean forward and settle",
+        "start one hurried lean forward and settle; very small movement from frame 2",
+        "continue one hurried lean forward and settle; smooth incremental change, no new gesture",
+        "build one hurried lean forward and settle; keep the same anchor and silhouette",
+        "build one hurried lean forward and settle a little more; neighboring frames must connect",
+        "approach the peak of one hurried lean forward and settle; still one continuous motion",
+        "reach the clean peak of one hurried lean forward and settle; no extra pose or prop",
+        "hold the same peak for readability; minimal motion only",
+        "begin soft rebound from the peak of one hurried lean forward and settle",
+        "continue the rebound; return along the same motion path",
+        "follow through gently; no second action begins",
+        "settle close to the original rest pose",
+        "almost back to frame 1; tiny remaining motion",
+        "return to the loop start pose; match frame 1 closely",
+        "final loop-back frame; visually connects to frame 1 without a jump"
+      ]
+    },
+    {
+      "id": "off-work",
+      "label": "퇴근",
+      "textVariants": [
+        "퇴근각",
+        "집 간다",
+        "오늘 끝!"
+      ],
+      "prompt": "happy leaving work celebration, relieved expression",
+      "animationPrompt": "relieved off-work celebration with freeing gesture",
+      "motionPreset": "jump",
+      "frames": [
+        "rest pose for relieved off-work celebration with freeing gesture; prepare for one small celebratory hop and landing",
+        "tiny anticipation only; same character begins one small celebratory hop and landing",
+        "start one small celebratory hop and landing; very small movement from frame 2",
+        "continue one small celebratory hop and landing; smooth incremental change, no new gesture",
+        "build one small celebratory hop and landing; keep the same anchor and silhouette",
+        "build one small celebratory hop and landing a little more; neighboring frames must connect",
+        "approach the peak of one small celebratory hop and landing; still one continuous motion",
+        "reach the clean peak of one small celebratory hop and landing; no extra pose or prop",
+        "hold the same peak for readability; minimal motion only",
+        "begin soft rebound from the peak of one small celebratory hop and landing",
+        "continue the rebound; return along the same motion path",
+        "follow through gently; no second action begins",
+        "settle close to the original rest pose",
+        "almost back to frame 1; tiny remaining motion",
+        "return to the loop start pose; match frame 1 closely",
+        "final loop-back frame; visually connects to frame 1 without a jump"
+      ]
+    },
+    {
+      "id": "go-work",
+      "label": "출근",
+      "textVariants": [
+        "출근모드",
+        "커피 수혈",
+        "현실 입장"
+      ],
+      "prompt": "determined going to work pose, slightly sleepy but ready",
+      "animationPrompt": "sleepy but determined start-to-work march",
+      "motionPreset": "march",
+      "frames": [
+        "rest pose for sleepy but determined start-to-work march; prepare for one compact marching step in place",
+        "tiny anticipation only; same character begins one compact marching step in place",
+        "start one compact marching step in place; very small movement from frame 2",
+        "continue one compact marching step in place; smooth incremental change, no new gesture",
+        "build one compact marching step in place; keep the same anchor and silhouette",
+        "build one compact marching step in place a little more; neighboring frames must connect",
+        "approach the peak of one compact marching step in place; still one continuous motion",
+        "reach the clean peak of one compact marching step in place; no extra pose or prop",
+        "hold the same peak for readability; minimal motion only",
+        "begin soft rebound from the peak of one compact marching step in place",
+        "continue the rebound; return along the same motion path",
+        "follow through gently; no second action begins",
+        "settle close to the original rest pose",
+        "almost back to frame 1; tiny remaining motion",
+        "return to the loop start pose; match frame 1 closely",
+        "final loop-back frame; visually connects to frame 1 without a jump"
+      ]
+    },
+    {
+      "id": "morning",
+      "label": "굿모닝",
+      "textVariants": [
+        "아침 왔다",
+        "굿모닝!",
+        "기상 완료"
+      ],
+      "prompt": "fresh morning greeting, bright wake-up energy",
+      "animationPrompt": "fresh morning wake-up stretch and cheerful greeting",
+      "motionPreset": "stretch",
+      "frames": [
+        "rest pose for fresh morning wake-up stretch and cheerful greeting; prepare for one sleepy stretch and relax",
+        "tiny anticipation only; same character begins one sleepy stretch and relax",
+        "start one sleepy stretch and relax; very small movement from frame 2",
+        "continue one sleepy stretch and relax; smooth incremental change, no new gesture",
+        "build one sleepy stretch and relax; keep the same anchor and silhouette",
+        "build one sleepy stretch and relax a little more; neighboring frames must connect",
+        "approach the peak of one sleepy stretch and relax; still one continuous motion",
+        "reach the clean peak of one sleepy stretch and relax; no extra pose or prop",
+        "hold the same peak for readability; minimal motion only",
+        "begin soft rebound from the peak of one sleepy stretch and relax",
+        "continue the rebound; return along the same motion path",
+        "follow through gently; no second action begins",
+        "settle close to the original rest pose",
+        "almost back to frame 1; tiny remaining motion",
+        "return to the loop start pose; match frame 1 closely",
+        "final loop-back frame; visually connects to frame 1 without a jump"
+      ]
+    },
+    {
+      "id": "heart",
+      "label": "하트",
+      "textVariants": [
+        "하트 발사",
+        "맘 받아",
+        "사랑 충전"
+      ],
+      "prompt": "making a heart gesture, affectionate sparkling expression",
+      "animationPrompt": "heart gesture pops bigger with affectionate sparkle-like energy",
+      "motionPreset": "pop",
+      "frames": [
+        "rest pose for heart gesture pops bigger with affectionate sparkle-like energy; prepare for one soft pop-and-settle gesture",
+        "tiny anticipation only; same character begins one soft pop-and-settle gesture",
+        "start one soft pop-and-settle gesture; very small movement from frame 2",
+        "continue one soft pop-and-settle gesture; smooth incremental change, no new gesture",
+        "build one soft pop-and-settle gesture; keep the same anchor and silhouette",
+        "build one soft pop-and-settle gesture a little more; neighboring frames must connect",
+        "approach the peak of one soft pop-and-settle gesture; still one continuous motion",
+        "reach the clean peak of one soft pop-and-settle gesture; no extra pose or prop",
+        "hold the same peak for readability; minimal motion only",
+        "begin soft rebound from the peak of one soft pop-and-settle gesture",
+        "continue the rebound; return along the same motion path",
+        "follow through gently; no second action begins",
+        "settle close to the original rest pose",
+        "almost back to frame 1; tiny remaining motion",
+        "return to the loop start pose; match frame 1 closely",
+        "final loop-back frame; visually connects to frame 1 without a jump"
+      ]
+    }
+  ]
+}

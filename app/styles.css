@@ -151,6 +151,57 @@ button {
   gap: 12px;
 }
 
+.selection-summary {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.text-button {
+  min-height: 32px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: #fff;
+  color: var(--ink);
+  padding: 6px 10px;
+  font-size: 13px;
+}
+
+.situation-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
+  gap: 8px;
+  max-height: 220px;
+  overflow: auto;
+  padding-right: 4px;
+}
+
+.situation-option {
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fff;
+  padding: 8px 10px;
+}
+
+.situation-option.active {
+  border-color: var(--accent);
+  box-shadow: inset 0 0 0 2px rgba(17, 168, 138, 0.18);
+}
+
+.situation-option input {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--accent);
+}
+
 .asset-grid {
   grid-template-columns: minmax(0, 320px);
   max-width: 340px;
