@@ -2,6 +2,25 @@ export type JobStatus = "queued" | "generating_final" | "completed" | "failed";
 
 export type AssetKind = "final";
 
+export type TextOverlayMode = "default" | "custom";
+
+export type TextOverlayItem = {
+  id: string;
+  text: string;
+  x: number;
+  y: number;
+  rotation: number;
+  fontSize: number;
+  color: string;
+};
+
+export type SituationTextOverlay = {
+  mode: TextOverlayMode;
+  items: TextOverlayItem[];
+};
+
+export type TextOverlayMap = Record<string, SituationTextOverlay>;
+
 export type GeneratedAsset = {
   id: string;
   kind: AssetKind;
@@ -11,6 +30,8 @@ export type GeneratedAsset = {
   typeId: "A" | "B" | "C";
   filename: string;
   path: string;
+  mp4Filename?: string;
+  mp4Path?: string;
 };
 
 export type GenerationJob = {
@@ -22,6 +43,7 @@ export type GenerationJob = {
   letteringStyleLabel: string;
   letteringStylePrompt: string;
   selectedSituationIds: string[];
+  textOverlays?: TextOverlayMap;
   uploadPath: string;
   uploadMimeType: string;
   characterProfile?: string;

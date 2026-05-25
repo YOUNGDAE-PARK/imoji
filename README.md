@@ -1,6 +1,6 @@
 # Imoji MVP
 
-Pencil sketch to a KakaoTalk-style 320x320 GIF emoticon generator with selectable 1-24 item output.
+Pencil sketch to KakaoTalk-style 320x320 GIF/MP4 emoticon outputs with selectable 1-24 item generation.
 
 ## Run
 
@@ -12,7 +12,7 @@ npm run dev
 
 Set `GEMINI_API_KEY` and `MOCK_GENERATION=false` to call Gemini Vision and the image-reference sprite generator. Without a key, the app falls back to a local source-image motion preview so the full MVP flow can still be tested locally.
 
-The production path first analyzes the uploaded sketch with Gemini Vision, then sends the uploaded image itself as `inlineData` reference input to `GEMINI_IMAGE_MODEL` for each selected situation. The model creates one sixteen-frame 4x4 sprite sheet, and `scripts/sprite_sheet_to_gif.py` splits, aligns, labels, and encodes it into a 320x320 GIF.
+The production path first analyzes the uploaded sketch with Gemini Vision, then sends the uploaded image itself as `inlineData` reference input to `GEMINI_IMAGE_MODEL` for each selected situation. The model creates one sixteen-frame 4x4 sprite sheet, and `scripts/sprite_sheet_to_gif.py` splits, aligns, labels, and encodes it into a transparent-background 320x320 GIF. The worker also exports a matching white-background MP4 for ZIP downloads.
 
 Useful generation settings:
 
@@ -39,7 +39,7 @@ If you use conda, keep GIF conversion on the WSL Python where MoviePy is install
 PYTHON_BIN=/usr/bin/python3
 ```
 
-For real frame-to-GIF conversion, install Python dependencies:
+For real GIF/MP4 conversion, install Python dependencies:
 
 ```bash
 pip install -r requirements.txt

@@ -4,6 +4,7 @@ import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { promisify } from "node:util";
 import { GIFEncoder, applyPalette, quantize } from "gifenc";
+import { TextOverlayItem } from "./types";
 
 const execFileAsync = promisify(execFile);
 let nextImagenRequestAt = 0;
@@ -17,6 +18,7 @@ type GenerateInput = {
   outputGifPath: string;
   tempDir: string;
   label: string;
+  textOverlayItems?: TextOverlayItem[];
 };
 
 export async function generateGif(input: GenerateInput) {
@@ -42,6 +44,18 @@ export async function generateGif(input: GenerateInput) {
   await generateImageReferenceSpriteGif(input);
 }
 
+export async function generateMp4FromGif(inputGifPath: string, outputMp4Path: string) {
+  await mkdir(path.dirname(outputMp4Path), { recursive: true });
+  await execFileAsync(
+    resolvePythonBin(),
+    ["scripts/gif_to_mp4.py", inputGifPath, outputMp4Path],
+    {
+      cwd: process.cwd(),
+      timeout: 120000
+    }
+  );
+}
+
 function generationMode() {
   return process.env.GENERATION_MODE ?? "image_reference_sprite";
 }
@@ -49,7 +63,14 @@ function generationMode() {
 async function generateSourceMotionGif(input: GenerateInput) {
   await execFileAsync(
     resolvePythonBin(),
-    ["scripts/image_to_motion_gif.py", input.referenceImagePath, input.outputGifPath, input.label, input.motionPreset],
+    [
+      "scripts/image_to_motion_gif.py",
+      input.referenceImagePath,
+      input.outputGifPath,
+      input.label,
+      input.motionPreset,
+      textOverlayArg(input.textOverlayItems)
+    ],
     {
       cwd: process.cwd(),
       timeout: 120000
@@ -89,7 +110,7 @@ async function generateImagenFrameGif(input: GenerateInput) {
 
   const spriteSheetBytes = typeof imageBytes === "string" ? Buffer.from(imageBytes, "base64") : Buffer.from(imageBytes);
   await writeFile(spriteSheetPath, spriteSheetBytes);
-  await convertSpriteSheetToGif(spriteSheetPath, input.outputGifPath, input.label);
+  await convertSpriteSheetToGif(spriteSheetPath, input.outputGifPath, input.label, input.textOverlayItems);
 }
 
 async function generateImageReferenceSpriteGif(input: GenerateInput) {
@@ -132,7 +153,7 @@ async function generateImageReferenceSpriteGif(input: GenerateInput) {
 
   const spriteSheetBytes = typeof imageBytes === "string" ? Buffer.from(imageBytes, "base64") : Buffer.from(imageBytes);
   await writeFile(spriteSheetPath, spriteSheetBytes);
-  await convertSpriteSheetToGif(spriteSheetPath, input.outputGifPath, input.label);
+  await convertSpriteSheetToGif(spriteSheetPath, input.outputGifPath, input.label, input.textOverlayItems);
 }
 
 async function generateImageWithQuotaRetry(ai: any, request: Record<string, unknown>) {
@@ -213,16 +234,36 @@ function retryDelayMs(error: unknown, attempt: number) {
   return 0;
 }
 
-async function convertSpriteSheetToGif(spriteSheetPath: string, outputPath: string, label: string) {
+async function convertSpriteSheetToGif(spriteSheetPath: string, outputPath: string, label: string, textOverlayItems?: TextOverlayItem[]) {
   const debugDir = path.join(path.dirname(spriteSheetPath), `${path.basename(outputPath, ".gif")}_debug_frames`);
-  await execFileAsync(resolvePythonBin(), ["scripts/sprite_sheet_to_gif.py", spriteSheetPath, outputPath, label, debugDir], {
-    cwd: process.cwd(),
-    timeout: 120000
-  });
+  await execFileAsync(
+    resolvePythonBin(),
+    ["scripts/sprite_sheet_to_gif.py", spriteSheetPath, outputPath, label, debugDir, textOverlayArg(textOverlayItems)],
+    {
+      cwd: process.cwd(),
+      timeout: 120000
+    }
+  );
+}
+
+function textOverlayArg(items?: TextOverlayItem[]) {
+  if (!items?.length) return "";
+  return JSON.stringify(items.map((item) => ({
+    text: item.text,
+    x: item.x,
+    y: item.y,
+    rotation: item.rotation,
+    fontSize: item.fontSize,
+    color: item.color
+  })));
 }
 
 function resolvePythonBin() {
   if (process.env.PYTHON_BIN) return process.env.PYTHON_BIN;
+
+  const localVenvPython = path.join(process.cwd(), ".venv", "bin", "python");
+  if (existsSync(localVenvPython)) return localVenvPython;
+
   if (existsSync("/usr/bin/python3")) return "/usr/bin/python3";
   return "python3";
 }
@@ -235,7 +276,7 @@ function buildImagenSpriteSheetPrompt(basePrompt: string, situationLabel: string
     "Create one single 4x4 grid animation sprite sheet for a KakaoTalk emoticon GIF.",
     "Use exactly 16 animation frames in reading order across all 4 rows and 4 columns.",
     "Every grid cell must contain one animation frame; do not leave any cell blank or unused.",
-    "Solid plain white background across the entire image.",
+    "Transparent background or a solid plain removable white background across the entire image.",
     "No room, no street, no scenery, no props in the background.",
     "Do not add panel borders, numbers, captions, subtitles, or watermarks.",
     "Use a clean 4x4 grid layout with even spacing. Each used panel contains the same character centered in a square area.",
@@ -267,7 +308,7 @@ function buildReferenceSpriteSheetPrompt(basePrompt: string, situationLabel: str
     "Use exactly 16 animation frames in reading order: left to right, top row to bottom row.",
     "Every cell must be used and must show the same exact reference character in a consecutive animation pose.",
     "No text, no Korean letters, no captions, no speech bubbles, no watermarks, no frame numbers, and no panel labels. Korean text will be overlaid later by post-processing.",
-    "Use a plain white or transparent background only. No rooms, scenery, props, borders, or grid lines.",
+    "Use a transparent background or plain removable white background only. The character itself must be fully colored and opaque. No rooms, scenery, props, borders, or grid lines.",
     "Keep camera distance, canvas coordinates, character scale, torso anchor, and framing stable across all sixteen frames.",
     "Animate exactly one core action only. Do not combine multiple gestures, new poses, scene cuts, or separate mini-actions in the same sprite sheet.",
     "The sixteen frames must be a smooth looping cycle of that one action: rest -> tiny anticipation -> action begins -> action peak -> soft rebound -> return to rest.",

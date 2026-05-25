@@ -5,7 +5,9 @@
 - 사용자가 최소 입력만으로 이모티콘 세트를 생성할 수 있게 한다.
 - 원본 스케치의 캐릭터 정체성을 유지한다.
 - 생성 과정은 비동기로 처리해 사용자가 대기 상태를 확인할 수 있게 한다.
-- 최종 결과물은 사용자가 선택한 1~24개의 320×320 GIF 파일과 ZIP 다운로드 형태로 제공한다.
+- 최종 결과물은 사용자가 선택한 1~24개의 320×320 투명 배경 GIF 파일과 동일 애니메이션의 흰 배경 MP4 파일을 ZIP 다운로드 형태로 제공한다.
+- 사용자가 상황별 문구의 위치, 회전, 크기, 색상을 직접 조정할 수 있게 한다.
+- 생성 화면과 보관함을 상단 메뉴로 분리해, 제작 흐름과 과거 결과 조회 흐름을 명확히 구분한다.
 
 ## 2. 상위 아키텍처
 현재 구조는 단순한 웹 앱 + API + 로컬 작업 저장소 + 백그라운드 생성 워커 형태다.
@@ -13,11 +15,12 @@
 ```mermaid
 flowchart TD
     U[사용자 브라우저] --> P[Next.js UI]
-    P --> A[POST /api/jobs]
+    P --> A[POST /api/jobs + textOverlays]
+    P --> L[GET /api/jobs 보관함 조회]
     A --> J[Job 저장]
     J --> W[백그라운드 Worker]
     W --> C[캐릭터 특징 분석]
-    C --> G[선택한 상황별 GIF 1~24종 생성]
+    C --> G[선택한 상황별 GIF/MP4 1~24종 생성]
     G --> S[파일 저장소]
     P --> Q[GET /api/jobs/:id 상태 조회]
     P --> D[결과 다운로드]
@@ -28,10 +31,11 @@ flowchart TD
 ### 3.1 작업 생성
 1. 사용자가 스케치 파일을 업로드한다.
 2. 사용자가 스타일을 선택한다.
-3. 클라이언트가 FormData로 작업 생성 API를 호출한다.
-4. 서버는 입력값과 업로드 파일을 검증한다.
-5. 서버는 job 정보를 저장하고 작업 상태를 `queued`로 만든다.
-6. 워커가 대기열에서 작업을 가져간다.
+3. 사용자가 필요하면 상황별 문구를 선택하고, 캔버스에서 위치/회전/크기/색상을 조정한다.
+4. 클라이언트가 스케치, 스타일, 선택 상황, `textOverlays`를 FormData로 작업 생성 API에 전달한다.
+5. 서버는 입력값과 업로드 파일, 텍스트 오버레이 설정을 검증한다.
+6. 서버는 job 정보를 저장하고 작업 상태를 `queued`로 만든다.
+7. 워커가 대기열에서 작업을 가져간다.
 
 관련 구현:
 - [app/page.tsx](app/page.tsx)
@@ -58,9 +62,11 @@ flowchart TD
 3. 기본 생성 모드인 `image_reference_sprite`는 업로드 이미지를 `inlineData` reference image로 직접 넣어 같은 캐릭터의 4×4 스프라이트 시트를 생성한다.
 4. 모델 출력에는 글자를 넣지 않고, 16칸 전체를 애니메이션 프레임으로 사용한다.
 5. 후처리 스크립트가 스프라이트 시트를 패널별로 분리하고, foreground 기반으로 캐릭터 중심/크기/여백을 정규화한다.
-6. 정렬된 16개 프레임에 한국어 라벨을 직접 오버레이한 뒤 320×320 GIF로 변환한다.
-7. API 키가 없거나 `GENERATION_MODE=source_motion`인 경우에만 원본 이미지 crop/transform 기반 preview fallback을 사용한다.
-8. 생성된 GIF를 작업 디렉터리에 저장한다.
+6. 정렬된 16개 프레임에 한국어 라벨을 직접 오버레이한다. 사용자가 커스텀 문구를 지정한 상황은 저장된 `textOverlays`의 좌표/회전/크기/색상을 사용하고, 기본 모드는 상황별 추천 문구를 사용한다.
+7. 후처리 결과를 투명 배경의 320×320 GIF로 변환한다.
+8. API 키가 없거나 `GENERATION_MODE=source_motion`인 경우에만 원본 이미지 crop/transform 기반 preview fallback을 사용한다.
+9. 생성된 GIF를 같은 애니메이션의 320×320 MP4로 변환한다.
+10. 생성된 GIF와 MP4를 작업 디렉터리에 저장한다.
 
 관련 구현:
 - [lib/prompts.ts](lib/prompts.ts)
@@ -70,11 +76,14 @@ flowchart TD
 
 ### 3.4 결과 제공
 1. 클라이언트는 주기적으로 작업 상태를 조회한다.
-2. 작업이 완료되면 선택한 개수만큼의 GIF 목록을 표시한다.
-3. 사용자는 결과를 ZIP으로 다운로드한다.
+2. 클라이언트는 상단 메뉴의 `/archive` 보관함 페이지에서 `GET /api/jobs`로 과거 생성 작업 목록을 불러온다.
+3. 보관함은 최신순 목록을 페이지 단위로 표시하고, 각 행을 펼쳐 완료된 GIF 썸네일을 확인할 수 있게 한다.
+4. 작업이 완료되면 생성 화면에서도 선택한 개수만큼의 GIF 목록을 표시한다.
+5. 사용자는 GIF와 MP4가 함께 들어있는 ZIP을 다운로드하거나, 보관함에서 이전 작업을 다시 열어 확인한다.
 
 관련 구현:
 - [app/page.tsx](app/page.tsx)
+- [app/archive/page.tsx](app/archive/page.tsx)
 - [app/api/jobs/[jobId]/route.ts](app/api/jobs/[jobId]/route.ts)
 - [app/api/jobs/[jobId]/download/route.ts](app/api/jobs/[jobId]/download/route.ts)
 
@@ -91,6 +100,7 @@ classDiagram
       +letteringStyleId
       +letteringStyleLabel
       +selectedSituationIds[]
+      +textOverlays
       +uploadPath
       +uploadMimeType
       +characterProfile
@@ -108,6 +118,8 @@ classDiagram
       +typeId
       +filename
       +path
+      +mp4Filename
+      +mp4Path
     }
 
     GenerationJob --> GeneratedAsset
@@ -145,6 +157,7 @@ storage/
         sketch.png
       final/
         emoticon_01_hello.gif
+        emoticon_01_hello.mp4
         ...
       tmp/
       job.json
@@ -168,7 +181,8 @@ storage/
 - 상황 표현은 달라져도 캐릭터 동일성은 유지한다.
 - GIF 내부 프레임은 동일한 카메라 거리, 캐릭터 중심, 크기를 유지하도록 요청한다.
 - 모델 생성물에는 글자를 넣지 않고, 한국어 라벨은 후처리에서 직접 오버레이한다.
-- 배경은 단순하게 유지한다.
+- 커스텀 문구가 있는 경우에도 모델 프롬프트에 글자를 요구하지 않고, 후처리 단계에서만 위치/회전/크기/색상을 적용한다.
+- 최종 GIF는 투명 배경으로 저장하고, MP4는 투명 영역을 흰색으로 합성해 저장한다.
 
 상황별 문구와 액션은 `data/situations.json`에서 관리한다.
 각 상황은 UI 선택용 `label`, GIF 오버레이 후보인 `textVariants`, 기본 `prompt`, 전체 `animationPrompt`, 16개 프레임 지시인 `frames`를 가진다.
@@ -186,6 +200,8 @@ storage/
 - 16개 프레임의 캐릭터 중심과 높이 중앙값을 기준 anchor로 사용한다.
 - 각 프레임을 동일 320×320 캔버스에 scale/translate해 캐릭터 좌표와 여백을 통일한다.
 - raw sprite, split frame, normalized frame, labeled frame debug 이미지를 `tmp` 하위에 저장해 품질 확인이 가능하게 한다.
+- 사용자 텍스트 오버레이는 320×320 기준 좌표계로 저장하고, 각 정규화 프레임 위에 회전된 투명 레이어로 합성한다.
+- 최종 GIF 저장 직전 배경 픽셀만 투명 인덱스로 매핑하고, 이 GIF를 흰 배경에 합성해 MP4를 생성한다.
 
 ## 9. 운영 관점 설계 포인트
 ### 9.1 장점

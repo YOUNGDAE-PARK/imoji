@@ -1,7 +1,16 @@
 import { NextResponse } from "next/server";
-import { createJob, publicJob } from "@/lib/jobs";
+import { createJob, listJobs, publicJob } from "@/lib/jobs";
 
 export const runtime = "nodejs";
+
+export async function GET() {
+  try {
+    const jobs = await listJobs();
+    return NextResponse.json({ jobs: jobs.map(publicJob) });
+  } catch {
+    return NextResponse.json({ error: "작업 목록을 불러오지 못했습니다." }, { status: 500 });
+  }
+}
 
 export async function POST(request: Request) {
   try {

@@ -10,15 +10,18 @@ import {
   MIN_SELECTED_SITUATIONS,
   STYLE_PRESETS
 } from "./constants";
-import { GenerationJob } from "./types";
+import { GenerationJob, TextOverlayMap } from "./types";
 import { ensureJobDirs, jobDir, jobFile, readJson, storageRoot, writeJson } from "./storage";
 import { ensureWorker } from "./worker";
+
+const HEX_COLOR_RE = /^#[0-9a-f]{6}$/i;
 
 export async function createJob(formData: FormData) {
   const file = formData.get("sketch");
   const styleId = String(formData.get("styleId") ?? "");
   const letteringStyleId = String(formData.get("letteringStyleId") ?? LETTERING_STYLES[0].id);
   const selectedSituationIds = parseSelectedSituationIds(formData);
+  const textOverlays = parseTextOverlays(formData.get("textOverlays"), selectedSituationIds);
   const style = STYLE_PRESETS.find((item) => item.id === styleId);
   const letteringStyle = LETTERING_STYLES.find((item) => item.id === letteringStyleId);
 
@@ -45,6 +48,7 @@ export async function createJob(formData: FormData) {
     letteringStyleLabel: letteringStyle.label,
     letteringStylePrompt: letteringStyle.prompt,
     selectedSituationIds,
+    textOverlays,
     uploadPath,
     uploadMimeType: file.type,
     finalAssets: [],
@@ -66,7 +70,7 @@ export async function saveJob(job: GenerationJob) {
   await writeJson(jobFile(job.id), job);
 }
 
-export async function listQueuedJobs() {
+export async function listJobs() {
   const root = path.join(storageRoot(), "jobs");
   let ids: string[] = [];
   try {
@@ -78,13 +82,17 @@ export async function listQueuedJobs() {
   const jobs: GenerationJob[] = [];
   for (const id of ids) {
     try {
-      const job = await getJob(id);
-      if (job.status === "queued") jobs.push(job);
+      jobs.push(await getJob(id));
     } catch {
       // Ignore partial job folders.
     }
   }
-  return jobs.sort((a, b) => a.createdAt.localeCompare(b.createdAt));
+  return jobs.sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+}
+
+export async function listQueuedJobs() {
+  const jobs = await listJobs();
+  return jobs.filter((job) => job.status === "queued").sort((a, b) => a.createdAt.localeCompare(b.createdAt));
 }
 
 export function publicJob(job: GenerationJob) {
@@ -99,6 +107,8 @@ export function publicJob(job: GenerationJob) {
     error: job.error,
     finalAssets: job.finalAssets.map(assetForClient),
     finalCount: selectedSituationsForJob(job).length,
+    selectedSituationIds: job.selectedSituationIds,
+    textOverlays: job.textOverlays,
     createdAt: job.createdAt,
     updatedAt: job.updatedAt
   };
@@ -140,6 +150,56 @@ function parseSelectedSituationIds(formData: FormData) {
   return selectedIds;
 }
 
+function parseTextOverlays(value: FormDataEntryValue | null, selectedSituationIds: string[]): TextOverlayMap | undefined {
+  if (!value) return undefined;
+
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(String(value));
+  } catch {
+    throw new Error("텍스트 오버레이 설정을 읽지 못했습니다.");
+  }
+
+  if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
+    throw new Error("텍스트 오버레이 형식이 올바르지 않습니다.");
+  }
+
+  const selected = new Set(selectedSituationIds);
+  const result: TextOverlayMap = {};
+  for (const [situationId, overlay] of Object.entries(parsed as Record<string, unknown>)) {
+    if (!selected.has(situationId)) continue;
+    if (!overlay || typeof overlay !== "object" || Array.isArray(overlay)) continue;
+    const candidate = overlay as Record<string, unknown>;
+    const mode = candidate.mode === "custom" ? "custom" : "default";
+    const rawItems = Array.isArray(candidate.items) ? candidate.items : [];
+    const items = rawItems.slice(0, 6).flatMap((item) => {
+      if (!item || typeof item !== "object" || Array.isArray(item)) return [];
+      const raw = item as Record<string, unknown>;
+      const text = String(raw.text ?? "").trim().slice(0, 24);
+      if (!text) return [];
+      const color = String(raw.color ?? "#261f19");
+      return [{
+        id: String(raw.id ?? crypto.randomUUID()).slice(0, 80),
+        text,
+        x: clampNumber(raw.x, 0, 320, 160),
+        y: clampNumber(raw.y, 0, 320, 270),
+        rotation: clampNumber(raw.rotation, -45, 45, 0),
+        fontSize: clampNumber(raw.fontSize, 18, 72, 44),
+        color: HEX_COLOR_RE.test(color) ? color : "#261f19"
+      }];
+    });
+    result[situationId] = { mode, items };
+  }
+
+  return Object.keys(result).length ? result : undefined;
+}
+
+function clampNumber(value: unknown, min: number, max: number, fallback: number) {
+  const numeric = Number(value);
+  if (!Number.isFinite(numeric)) return fallback;
+  return Math.max(min, Math.min(max, numeric));
+}
+
 function assetForClient(asset: GenerationJob["finalAssets"][number]) {
   return {
     id: asset.id,
@@ -149,6 +209,7 @@ function assetForClient(asset: GenerationJob["finalAssets"][number]) {
     displayText: asset.displayText ?? asset.situationLabel,
     typeId: asset.typeId,
     filename: asset.filename,
+    mp4Filename: asset.mp4Filename,
     url: `/api/jobs/${asset.id.split(":")[0]}/assets/${encodeURIComponent(asset.id)}`
   };
 }

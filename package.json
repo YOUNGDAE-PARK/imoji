@@ -3,9 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "PYTHON_BIN=/home/eins777/workspace/imoji/.venv/bin/python next dev",
     "build": "next build",
-    "start": "next start",
+    "start": "PYTHON_BIN=/home/eins777/workspace/imoji/.venv/bin/python next start",
     "lint": "next lint",
     "typecheck": "tsc --noEmit"
   },

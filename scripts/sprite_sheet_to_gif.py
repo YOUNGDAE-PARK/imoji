@@ -1,3 +1,4 @@
+import json
 import sys
 from collections import deque
 from statistics import median
@@ -22,6 +23,8 @@ GRID_COLUMNS = 4
 GRID_ROWS = 4
 FRAME_DURATION_MS = 180
 SAFE_OVERLAP_THRESHOLD = 0.02
+TRANSPARENT_INDEX = 255
+TRANSPARENT_FALLBACK_RGB = (255, 255, 255)
 
 
 def fit_panel_to_canvas(panel, size=320):
@@ -224,6 +227,15 @@ def stabilize_loop_frames(rgba_frames):
     return rgba_frames
 
 
+def hex_to_rgba(value, fallback=(38, 31, 25, 255)):
+    if not isinstance(value, str) or len(value) != 7 or not value.startswith("#"):
+        return fallback
+    try:
+        return (int(value[1:3], 16), int(value[3:5], 16), int(value[5:7], 16), 255)
+    except ValueError:
+        return fallback
+
+
 def load_label_font(label, size):
     font_path = next((path for path in FONT_CANDIDATES if Path(path).exists()), None)
     if not font_path:
@@ -314,20 +326,80 @@ def global_safe_position(rgba_frames, text_width, text_height):
 
 
 def rgba_to_palette_with_transparency(rgba_image):
-    """투명도를 보존하면서 RGBA → P(팔레트) 변환, 인덱스 255를 투명으로 예약"""
+    """투명도를 보존하면서 RGBA 프레임을 GIF 팔레트 이미지로 변환"""
+    rgba_image = rgba_image.convert("RGBA")
     alpha = rgba_image.split()[3]
-    p_image = rgba_image.convert("RGB").quantize(colors=255, dither=Image.Dither.NONE)
-    palette = p_image.getpalette()
-    palette[255 * 3:255 * 3 + 3] = [255, 255, 255]
-    p_image.putpalette(palette)
+
+    rgb_image = Image.new("RGB", rgba_image.size, TRANSPARENT_FALLBACK_RGB)
+    rgb_image.paste(rgba_image.convert("RGB"), mask=alpha)
+
+    p_image = rgb_image.quantize(colors=TRANSPARENT_INDEX, dither=Image.Dither.NONE)
+    palette = p_image.getpalette() or []
+    palette = palette[:256 * 3]
+    if len(palette) < 256 * 3:
+        palette.extend([255] * (256 * 3 - len(palette)))
+    palette[TRANSPARENT_INDEX * 3:TRANSPARENT_INDEX * 3 + 3] = list(TRANSPARENT_FALLBACK_RGB)
+    palette_bytes = bytes(palette)
+    p_image.putpalette(palette_bytes, "RGB")
+
     p_data = bytearray(p_image.tobytes())
-    a_data = alpha.tobytes()
-    for i, a_val in enumerate(a_data):
+    for i, a_val in enumerate(alpha.tobytes()):
         if a_val < 128:
-            p_data[i] = 255
+            p_data[i] = TRANSPARENT_INDEX
+
     result = Image.frombytes("P", p_image.size, bytes(p_data))
-    result.putpalette(palette)
+    result.putpalette(palette_bytes, "RGB")
+    result.info["transparency"] = TRANSPARENT_INDEX
+    result.info["background"] = TRANSPARENT_INDEX
     return result
+
+
+def build_custom_text_layer(item):
+    label = str(item.get("text", ""))[:24]
+    font_size = int(clamp(float(item.get("fontSize", 44)), 18, 72))
+    font = load_label_font(label, font_size)
+    probe = ImageDraw.Draw(Image.new("RGBA", (1, 1)))
+    left, top, right, bottom = probe.textbbox((0, 0), label, font=font, stroke_width=2)
+    text_width = right - left
+    text_height = bottom - top
+    padding_x = max(10, round(font_size * 0.34))
+    padding_y = max(8, round(font_size * 0.28))
+    layer = Image.new("RGBA", (text_width + padding_x * 2, text_height + padding_y * 2), (255, 255, 255, 0))
+    draw = ImageDraw.Draw(layer)
+    text_x = padding_x - left
+    text_y = padding_y - top
+    fill = hex_to_rgba(item.get("color"))
+    draw.text((text_x + 1, text_y + 2), label, font=font, fill=(0, 0, 0, 70), stroke_width=2, stroke_fill=(0, 0, 0, 55))
+    draw.text((text_x, text_y), label, font=font, fill=fill, stroke_width=2, stroke_fill=(255, 255, 255, 235))
+    angle = float(item.get("rotation", 0))
+    if angle:
+        layer = layer.rotate(angle, resample=Image.Resampling.BICUBIC, expand=True, fillcolor=(255, 255, 255, 0))
+    return layer
+
+
+def parse_custom_text_items(raw):
+    if not raw:
+        return []
+    try:
+        parsed = json.loads(raw)
+    except json.JSONDecodeError:
+        return []
+    if not isinstance(parsed, list):
+        return []
+    return [item for item in parsed[:6] if isinstance(item, dict) and str(item.get("text", "")).strip()]
+
+
+def draw_custom_text_items(frame, items):
+    if not items:
+        return frame
+    canvas = frame.copy().convert("RGBA")
+    for item in items:
+        layer = build_custom_text_layer(item)
+        center_x = clamp(float(item.get("x", 160)), 0, 320)
+        center_y = clamp(float(item.get("y", 270)), 0, 320)
+        position = (round(center_x - layer.width / 2), round(center_y - layer.height / 2))
+        canvas.alpha_composite(layer, position)
+    return canvas
 
 
 def build_text_layer(label):
@@ -372,13 +444,14 @@ def draw_label(frame, label, frame_index, position=None, text_to_place=None):
 
 
 def main():
-    if len(sys.argv) not in (3, 4, 5):
-        raise SystemExit("Usage: sprite_sheet_to_gif.py <sprite_sheet.png> <output.gif> [label] [debug_dir]")
+    if len(sys.argv) not in (3, 4, 5, 6):
+        raise SystemExit("Usage: sprite_sheet_to_gif.py <sprite_sheet.png> <output.gif> [label] [debug_dir] [text_overlay_json]")
 
     input_path = Path(sys.argv[1])
     output_path = Path(sys.argv[2])
     label = sys.argv[3] if len(sys.argv) >= 4 else ""
-    debug_dir = Path(sys.argv[4]) if len(sys.argv) == 5 else None
+    debug_dir = Path(sys.argv[4]) if len(sys.argv) >= 5 and sys.argv[4] else None
+    custom_text_items = parse_custom_text_items(sys.argv[5]) if len(sys.argv) >= 6 else []
     output_path.parent.mkdir(parents=True, exist_ok=True)
     if debug_dir:
         debug_dir.mkdir(parents=True, exist_ok=True)
@@ -416,7 +489,11 @@ def main():
         for index, frame in enumerate(rgba_frames, start=1):
             frame.save(debug_dir / f"normalized_{index:02d}.png")
 
-    if label:
+    if custom_text_items:
+        effective_label = ""
+        text_to_place = None
+        pos = None
+    elif label:
         text_to_place = build_text_layer(label)
         pos = global_safe_position(rgba_frames, text_to_place.width, text_to_place.height)
         if pos is None:
@@ -431,12 +508,16 @@ def main():
         pos = None
 
     frames = [
-        rgba_to_palette_with_transparency(draw_label(frame, effective_label, index, position=pos, text_to_place=text_to_place))
+        rgba_to_palette_with_transparency(
+            draw_custom_text_items(frame, custom_text_items)
+            if custom_text_items
+            else draw_label(frame, effective_label, index, position=pos, text_to_place=text_to_place)
+        )
         for index, frame in enumerate(rgba_frames)
     ]
     if debug_dir:
         for index, frame in enumerate(frames, start=1):
-            frame.convert("RGBA").save(debug_dir / f"labeled_{index:02d}.png")
+            frame.copy().convert("RGBA").save(debug_dir / f"labeled_{index:02d}.png")
 
     frames[0].save(
         output_path,
@@ -444,8 +525,10 @@ def main():
         append_images=frames[1:],
         duration=FRAME_DURATION_MS,
         loop=0,
-        transparency=255,
+        transparency=TRANSPARENT_INDEX,
+        background=TRANSPARENT_INDEX,
         disposal=2,
+        optimize=False,
     )
 
 

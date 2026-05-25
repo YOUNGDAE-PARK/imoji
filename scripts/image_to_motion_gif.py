@@ -58,19 +58,30 @@ def remove_white_background(image, threshold=210, max_delta=30):
 
 
 def rgba_to_palette_with_transparency(rgba_image):
-    """투명도를 보존하면서 RGBA → P(팔레트) 변환, 인덱스 255를 투명으로 예약"""
+    """투명도를 보존하면서 RGBA 프레임을 GIF 팔레트 이미지로 변환"""
+    rgba_image = rgba_image.convert("RGBA")
     alpha = rgba_image.split()[3]
-    p_image = rgba_image.convert("RGB").quantize(colors=255, dither=Image.Dither.NONE)
-    palette = p_image.getpalette()
+
+    rgb_image = Image.new("RGB", rgba_image.size, (255, 255, 255))
+    rgb_image.paste(rgba_image.convert("RGB"), mask=alpha)
+
+    p_image = rgb_image.quantize(colors=255, dither=Image.Dither.NONE)
+    palette = (p_image.getpalette() or [])[:256 * 3]
+    if len(palette) < 256 * 3:
+        palette.extend([255] * (256 * 3 - len(palette)))
     palette[255 * 3:255 * 3 + 3] = [255, 255, 255]
-    p_image.putpalette(palette)
+    palette_bytes = bytes(palette)
+    p_image.putpalette(palette_bytes, "RGB")
+
     p_data = bytearray(p_image.tobytes())
-    a_data = alpha.tobytes()
-    for i, a_val in enumerate(a_data):
+    for i, a_val in enumerate(alpha.tobytes()):
         if a_val < 128:
             p_data[i] = 255
+
     result = Image.frombytes("P", p_image.size, bytes(p_data))
-    result.putpalette(palette)
+    result.putpalette(palette_bytes, "RGB")
+    result.info["transparency"] = 255
+    result.info["background"] = 255
     return result
 
 
@@ -362,8 +373,8 @@ def render_frame(subject, step, label):
 
 
 def main():
-    if len(sys.argv) not in (3, 4, 5):
-        raise SystemExit("Usage: image_to_motion_gif.py <base_image> <output.gif> [label] [motion_preset]")
+    if len(sys.argv) not in (3, 4, 5, 6):
+        raise SystemExit("Usage: image_to_motion_gif.py <base_image> <output.gif> [label] [motion_preset] [text_overlay_json]")
 
     input_path = Path(sys.argv[1])
     output_path = Path(sys.argv[2])
@@ -380,7 +391,9 @@ def main():
         duration=FRAME_DURATION_MS,
         loop=0,
         transparency=255,
+        background=255,
         disposal=2,
+        optimize=False,
     )
 
 

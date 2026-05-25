@@ -42,7 +42,7 @@ export function buildGenerationPrompt({
     "one core action repeated smoothly through the 16-frame loop; no multiple actions or sudden direction changes",
     `post-processing lettering style, not for model rendering: ${letteringStylePrompt}`,
     "do not draw any letters, captions, speech bubbles, or text in the generated image",
-    "simple readable sticker character with clear silhouette",
-    "transparent background only; do not fill with white; all non-character areas must be fully transparent; no scenery, props, or environmental elements"
+    "simple readable sticker character with clear silhouette and opaque clean colors",
+    "transparent background or plain removable white background only; all character pixels must be fully colored and opaque; no scenery, props, or environmental elements"
   ].join(", ");
 }

@@ -1,6 +1,6 @@
 import path from "node:path";
 import { analyzeCharacterProfile } from "./characterProfile";
-import { generateGif } from "./generator";
+import { generateGif, generateMp4FromGif } from "./generator";
 import { listQueuedJobs, saveJob, selectedSituationsForJob } from "./jobs";
 import { buildGenerationPrompt } from "./prompts";
 import { jobDir } from "./storage";
@@ -46,11 +46,18 @@ async function generateFinal(job: GenerationJob) {
     const situation = situations[index];
     const labelEnabled =
       process.env.LABEL_TEXT_ENABLED === "1" || process.env.LABEL_TEXT_ENABLED === "true";
-    const displayText = pickDisplayText(job.id, situation.id, situation.textVariants);
-    const gifLabel = labelEnabled ? displayText : "";
+    const overlay = job.textOverlays?.[situation.id];
+    const customTextItems = overlay?.mode === "custom" ? overlay.items : undefined;
+    const displayText = customTextItems?.length
+      ? customTextItems.map((item) => item.text).join(" / ")
+      : pickDisplayText(job.id, situation.id, situation.textVariants);
+    const gifLabel = labelEnabled && !customTextItems?.length ? displayText : "";
     const id = `${job.id}:final:A:${situation.id}`;
-    const filename = `emoticon_${String(index + 1).padStart(2, "0")}_${situation.id}.gif`;
+    const basename = `emoticon_${String(index + 1).padStart(2, "0")}_${situation.id}`;
+    const filename = `${basename}.gif`;
+    const mp4Filename = `${basename}.mp4`;
     const outputPath = path.join(jobDir(job.id), "final", filename);
+    const mp4Path = path.join(jobDir(job.id), "final", mp4Filename);
     const prompt = buildGenerationPrompt({
       styleId: job.styleId,
       characterProfile,
@@ -69,8 +76,10 @@ async function generateFinal(job: GenerationJob) {
       referenceMimeType: job.uploadMimeType,
       outputGifPath: outputPath,
       tempDir: path.join(jobDir(job.id), "tmp"),
-      label: gifLabel
+      label: gifLabel,
+      textOverlayItems: customTextItems
     });
+    await generateMp4FromGif(outputPath, mp4Path);
 
     assets.push({
       id,
@@ -80,7 +89,9 @@ async function generateFinal(job: GenerationJob) {
       displayText,
       typeId: "A",
       filename,
-      path: outputPath
+      path: outputPath,
+      mp4Filename,
+      mp4Path
     });
   }
 

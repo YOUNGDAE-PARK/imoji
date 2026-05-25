@@ -1,4 +1,5 @@
 import { readFile } from "node:fs/promises";
+import { existsSync } from "node:fs";
 import JSZip from "jszip";
 import { NextResponse } from "next/server";
 import { getJob } from "@/lib/jobs";
@@ -15,6 +16,9 @@ export async function GET(_request: Request, { params }: { params: { jobId: stri
     const zip = new JSZip();
     for (const asset of job.finalAssets) {
       zip.file(asset.filename, await readFile(asset.path));
+      if (asset.mp4Filename && asset.mp4Path && existsSync(asset.mp4Path)) {
+        zip.file(asset.mp4Filename, await readFile(asset.mp4Path));
+      }
     }
 
     const buffer = await zip.generateAsync({ type: "nodebuffer" });
