@@ -297,11 +297,10 @@ def generate_keyframes(emotion: str, dna: dict, base_path: Path, colors: dict) -
 
 
 # ═════════════════════════════════════════════════════════════════════════════
-# STAGE 4: 키프레임 보간 → GIF (PIL blend + easing)
-# 4개 키프레임을 부드럽게 이어붙여 실제 액션 애니메이션 생성
+# STAGE 4: 키프레임 → GIF (shift 보간 — blend 잔상 없음)
 # ═════════════════════════════════════════════════════════════════════════════
 SIZE = 360
-FPS  = 12
+FPS  = 10  # 100ms/frame
 
 BASE_CHAR_BBOX: tuple | None = None  # (top, bottom, left, right)
 
@@ -354,36 +353,75 @@ def _load_kf(path: Path) -> Image.Image:
 
     return canvas
 
+def _shift_canvas(img: Image.Image, dy: int, dx: int = 0) -> Image.Image:
+    """캐릭터를 dy(아래+/위-), dx(오른쪽+/왼쪽-) 픽셀 이동. 빈 영역 흰색."""
+    if dy == 0 and dx == 0:
+        return img
+    arr = np.array(img)
+    h, w = arr.shape[:2]
+    result = np.full_like(arr, 255)
+    if dy > 0:
+        result[dy:, :] = arr[:h - dy, :]
+    elif dy < 0:
+        result[:h + dy, :] = arr[-dy:, :]
+    else:
+        result[:] = arr
+    if dx != 0:
+        tmp = result.copy()
+        result = np.full_like(arr, 255)
+        if dx > 0:
+            result[:, dx:] = tmp[:, :w - dx]
+        else:
+            result[:, :w + dx] = tmp[:, -dx:]
+    return Image.fromarray(result)
+
+
 def animate_from_keyframes(
     emotion: str,
     kf_paths: list[Path],
     hold_frames: list[int],
     transition_frames: list[int],
+    shift_offsets: list[tuple[int, int]] | None = None,
+    shake_holds: list[int] | None = None,
 ) -> Path:
-    """PIL 직접 저장 — per-frame duration 정확 제어, 잔상 없는 컷."""
+    """
+    shift_offsets : (dy, dx) per keyframe — blend 없이 위치 이동으로 in-between 생성
+    shake_holds   : x-진폭 per keyframe — hold 구간 좌우 진동 (0이면 미적용)
+    """
     print(f"\n[Stage 4] '{emotion}' GIF 생성 중...")
     kf_images = [_load_kf(p) for p in kf_paths]
     n = len(kf_images)
-    frame_ms = 1000 // FPS  # 83ms
+    frame_ms = 1000 // FPS
 
     frames_out: list[Image.Image] = []
     durations_out: list[int] = []
 
     for i in range(n):
-        kf_cur  = kf_images[i]
-        kf_next = kf_images[(i + 1) % n]
-        hold  = hold_frames[i % len(hold_frames)]
-        trans = transition_frames[i % len(transition_frames)]
+        kf_cur = kf_images[i]
+        hold   = hold_frames[i % len(hold_frames)]
+        trans  = transition_frames[i % len(transition_frames)]
 
-        # 홀드: 1장 + 긴 duration (파일 크기 절약)
-        frames_out.append(kf_cur.copy())
-        durations_out.append(hold * frame_ms)
+        dy_cur, dx_cur = shift_offsets[i % len(shift_offsets)] if shift_offsets else (0, 0)
+        dy_nxt, dx_nxt = shift_offsets[(i + 1) % len(shift_offsets)] if shift_offsets else (0, 0)
+        shake_amp = shake_holds[i % len(shake_holds)] if shake_holds else 0
 
-        # 전환: trans=0 → 즉시 컷, trans≥1 → blend 삽입
+        # 홀드: 선택적 x-shake (손 닦기 등 좌우 동작 표현)
+        for k in range(hold):
+            if shake_amp and k % 2 == 1:
+                sign = -1 if (k % 4) < 2 else 1
+                frame = _shift_canvas(kf_cur, dy_cur, dx_cur + shake_amp * sign)
+            else:
+                frame = _shift_canvas(kf_cur, dy_cur, dx_cur)
+            frames_out.append(frame)
+            durations_out.append(frame_ms)
+
+        # 전환: shift 보간 — kf_cur 이미지를 nxt 위치로 이동 (blend 잔상 없음)
         if trans > 0:
             for j in range(trans):
-                alpha = (j + 1) / (trans + 1)
-                frames_out.append(Image.blend(kf_cur, kf_next, alpha))
+                t = (j + 1) / (trans + 1)
+                dy_t = int(dy_cur + (dy_nxt - dy_cur) * t)
+                dx_t = int(dx_cur + (dx_nxt - dx_cur) * t)
+                frames_out.append(_shift_canvas(kf_cur, dy_t, dx_t))
                 durations_out.append(frame_ms)
 
     out = OUTPUT_DIR / f"{emotion}.gif"
@@ -394,7 +432,7 @@ def animate_from_keyframes(
         append_images=pil_frames[1:],
         loop=0,
         duration=durations_out,
-        optimize=True,
+        optimize=False,
     )
     size_kb = out.stat().st_size / 1024
     total_s = sum(durations_out) / 1000
@@ -438,23 +476,24 @@ if __name__ == "__main__":
     # ── 기쁨 ────────────────────────────────────────────────────────────────
     joy_kfs = generate_keyframes("joy", dna, base_path, colors)
     animate_from_keyframes(
-        emotion    = "joy",
-        kf_paths   = joy_kfs,
-        # ready:2, squat:2, leap:2, peak:4(정점 강조), descend:2, land:3
-        hold_frames       = [2, 2, 2, 4, 2, 3],
-        # 점프 구간은 즉시 컷(0), 시작/끝은 1프레임 컷
-        transition_frames = [1, 0, 1, 1, 0, 1],
+        emotion           = "joy",
+        kf_paths          = joy_kfs,
+        hold_frames       = [2, 1, 1, 3, 1, 2],   # sum=10 + trans=5 → 15프레임
+        transition_frames = [1, 1, 1, 1, 1, 0],
+        # ready=기준, squat=+8(무릎굽힘↓), leap=-15(공중↑), peak=-22(최고점↑), descend=-8(하강), land=0
+        shift_offsets     = [(0,0), (8,0), (-15,0), (-22,0), (-8,0), (0,0)],
+        shake_holds       = None,
     )
 
     # ── 슬픔 ────────────────────────────────────────────────────────────────
     sad_kfs = generate_keyframes("sadness", dna, base_path, colors)
     animate_from_keyframes(
-        emotion    = "sadness",
-        kf_paths   = sad_kfs,
-        # neutral:3, cry_start:2, arm_raise:2, wipe:5(동작 강조), arm_lower:2, slump:4
-        hold_frames       = [3, 2, 2, 5, 2, 4],
-        # 눈물 닦는 동작은 1프레임 전환, 나머지도 최소
-        transition_frames = [1, 1, 1, 1, 1, 1],
+        emotion           = "sadness",
+        kf_paths          = sad_kfs,
+        hold_frames       = [2, 1, 1, 4, 1, 4],   # sum=13 + trans=1 → 14프레임
+        transition_frames = [0, 0, 1, 0, 0, 0],   # arm_raise→wipe 구간만 전환
+        shift_offsets     = [(0,0), (0,0), (0,0), (0,0), (0,0), (0,0)],
+        shake_holds       = [0, 0, 0, 6, 0, 0],   # wipe 구간 ±6px x-진동
     )
 
     print("\n" + "=" * 52)
