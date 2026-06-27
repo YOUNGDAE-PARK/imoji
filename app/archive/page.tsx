@@ -80,19 +80,14 @@ export default function ArchivePage() {
     <main className="site-shell archive-shell">
       <TopNav active="archive" />
 
-      <section className="hero-section archive-hero">
-        <div className="hero-copy">
-          <span className="eyebrow">Archive</span>
-          <h1>생성한 이모티콘 보관함</h1>
-          <p>최신 작업부터 확인하고, 행을 펼쳐 바로 생성된 GIF를 미리보거나 ZIP 파일로 내려받으세요.</p>
-        </div>
-        <button className="secondary dark-secondary" type="button" onClick={() => void loadJobs()} disabled={loading}>
-          {loading ? <Loader2 className="spin" size={16} /> : <RefreshCcw size={16} />}
-          새로고침
-        </button>
-      </section>
-
       <section className="main content-stack">
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <h2 style={{ margin: 0 }}>보관함</h2>
+          <button className="secondary dark-secondary" type="button" onClick={() => void loadJobs()} disabled={loading}>
+            {loading ? <Loader2 className="spin" size={16} /> : <RefreshCcw size={16} />}
+            새로고침
+          </button>
+        </div>
         <section className="panel archive-page-panel">
           <div className="archive-table-head">
             <span>No.</span>

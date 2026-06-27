@@ -1,0 +1,484 @@
+{
+  "situations": [
+    {
+      "id": "serve_ace",
+      "label": "에이스",
+      "textVariants": [
+        "에이스!",
+        "못 받지?",
+        "강스핀이닷!"
+      ],
+      "prompt": "tennis player triumphantly celebrating an ace serve, racket raised in victory, electrified expression",
+      "animationPrompt": "character holds tennis racket in right hand throughout, arm swings forward in a powerful serve arc from ball-toss position overhead down through contact point, then raises racket in triumph as body leans forward with explosive momentum",
+      "motionPreset": "serve",
+      "frames": [
+        "neutral standing pose, character holds tennis racket in right hand at side, centered and ready",
+        "left arm begins to lift upward in ball-toss motion, right arm with racket drops back behind head",
+        "left arm fully extended upward at peak toss, right arm cocks racket behind head at maximum backswing",
+        "body begins to coil, knees bend slightly, weight shifts to back foot, racket pulled fully back",
+        "body uncoils upward, right arm with racket begins sweeping forward and upward toward contact point",
+        "right arm with racket reaches contact point overhead at full extension, body fully stretched upward",
+        "racket makes contact at peak, arm fully extended, explosive impact expression on face",
+        "follow-through begins, racket sweeps down and across body from right to left",
+        "racket completes follow-through to left hip area, body weight shifts forward",
+        "character leans forward with momentum after serve, triumphant grin spreading",
+        "right arm with racket raises upward in victory gesture, fist pump energy",
+        "racket held high overhead in triumph, elated celebration expression peaks",
+        "both arms raise slightly, racket still in right hand, victorious pose held",
+        "body settles back to upright position, racket lowering to side, satisfied smile",
+        "character stands tall with racket at side, confident ready expression",
+        "neutral standing pose identical to frame 1, racket in right hand, ready for loop"
+      ]
+    },
+    {
+      "id": "forehand",
+      "label": "포핸드",
+      "textVariants": [
+        "포핸드닷!",
+        "드라이브!",
+        "탑스핀GO"
+      ],
+      "prompt": "tennis player executing a powerful forehand drive, full body rotation with racket swinging in wide arc",
+      "animationPrompt": "character holds tennis racket in right hand throughout, body rotates left hip forward as racket swings from low backswing position on the right side in a full arc across the body to a high follow-through finish over the left shoulder",
+      "motionPreset": "swing",
+      "frames": [
+        "neutral ready stance, character holds tennis racket in right hand, knees slightly bent, centered",
+        "body begins to rotate right, right shoulder turns back, racket pulls back to right hip level",
+        "shoulder fully rotated back, racket drops low to knee level on right side, weight on right foot",
+        "racket at lowest point of backswing, body coiled like a spring, intense focus expression",
+        "forward swing begins, hips start rotating left, racket begins upward arc from low position",
+        "hips halfway through rotation, racket rises to waist height mid-swing, left foot weight shift",
+        "contact point reached at waist-to-chest height, racket face square, body fully rotating through",
+        "explosive follow-through begins, racket continues upward arc past contact, body fully opened",
+        "racket continues sweeping up and across body toward left shoulder in follow-through",
+        "racket reaches shoulder height in follow-through, right arm crossing body leftward",
+        "racket finishes high over left shoulder, body fully rotated left, triumphant grunt face",
+        "hold follow-through peak position, racket over left shoulder, satisfied grin",
+        "body begins to unwind from follow-through, racket lowering from left shoulder",
+        "body returns toward center, racket coming back to ready position",
+        "character resettles into ready stance, racket in right hand at side",
+        "neutral ready pose identical to frame 1, racket in right hand, ready for loop"
+      ]
+    },
+    {
+      "id": "backhand",
+      "label": "백핸드",
+      "textVariants": [
+        "백핸드!",
+        "두손으로!",
+        "이게 투핸즈"
+      ],
+      "prompt": "tennis player hitting a sharp two-handed backhand, both hands gripping racket in wide cross-body swing",
+      "animationPrompt": "character holds tennis racket in right hand with left hand also gripping the racket for a two-handed backhand, body coils to the right then explosively unwinds leftward as both arms swing the racket from right-side backswing across the body in a powerful arc finishing high on the left",
+      "motionPreset": "swing",
+      "frames": [
+        "neutral ready stance, character holds tennis racket in right hand with left hand near grip, centered",
+        "both hands grip racket together, body rotates right, shoulders turning, weight shifting to left foot",
+        "body fully coiled right, racket pulled back behind right hip with both hands, ready to explode",
+        "knees bent, body at lowest coil point, racket behind right hip, intense focused expression",
+        "uncoiling begins, hips drive left, both arms begin pulling racket forward from right side",
+        "both arms sweep racket forward at low-to-waist level, hips halfway through rotation",
+        "contact point reached at waist height, racket face square, both arms extended, power expression",
+        "follow-through begins with both hands, racket sweeps upward and leftward from contact",
+        "both arms continue sweeping racket upward in follow-through arc across body",
+        "racket reaches chest height in follow-through, body fully rotated to face left",
+        "racket finishes high on left side, both arms extended, triumphant sharp grunt expression",
+        "hold backhand finish position, racket up-left, satisfied focused face",
+        "left hand releases racket, body begins to unwind from follow-through",
+        "body returns to center, right hand holding racket lowering to ready position",
+        "character resettles into ready stance, racket back in right hand only",
+        "neutral ready pose identical to frame 1, racket in right hand, ready for loop"
+      ]
+    },
+    {
+      "id": "smash",
+      "label": "스매시",
+      "textVariants": [
+        "스매시!",
+        "내려쳐라!",
+        "박살이닷"
+      ],
+      "prompt": "tennis player leaping up for an overhead smash, racket raised high above head with explosive jumping power",
+      "animationPrompt": "character holds tennis racket in right hand throughout, both feet leave the ground as character jumps upward with right arm fully extended overhead, racket poised at peak to smash down with devastating force, then lands and follows through",
+      "motionPreset": "jump",
+      "frames": [
+        "neutral ready stance, character holds tennis racket in right hand, looking up tracking lob",
+        "body begins to crouch, knees bending, eyes locked upward, racket hand pulling back",
+        "crouch deepens, right arm cocks racket back behind head, body coiling with explosive energy",
+        "explosive jump begins, both feet leaving ground, right arm swinging racket overhead rapidly",
+        "character fully airborne, both feet off ground, racket arm fully extended overhead at peak",
+        "peak of jump, racket held high above head ready to smash, fierce concentrated expression",
+        "smash contact point, racket strikes down with full force, explosive impact face",
+        "racket follows through downward after contact, still airborne beginning to descend",
+        "character begins to land, feet approaching ground, racket sweeping down to finish",
+        "both feet touch ground, racket follow-through at hip level, triumphant grin",
+        "landing absorbed with bent knees, racket pointing down, victorious expression peaks",
+        "body straightens from landing, right arm with racket raising in celebration",
+        "racket raised in right hand in victory pose, pumped-up expression",
+        "celebration settles, body upright, racket lowering back to ready position",
+        "character returns to ready stance, racket in right hand, confident smile",
+        "neutral ready pose identical to frame 1, racket in right hand, ready for loop"
+      ]
+    },
+    {
+      "id": "volley",
+      "label": "발리",
+      "textVariants": [
+        "발리!",
+        "네트 사수!",
+        "펀치샷GO"
+      ],
+      "prompt": "tennis player at the net executing a crisp punching volley, compact efficient motion with quick reflexes",
+      "animationPrompt": "character holds tennis racket in right hand throughout, positioned close to the net, right arm makes a short compact punching motion forward with minimal backswing, racket face firm and flat to punch the ball away cleanly",
+      "motionPreset": "volley_stop",
+      "frames": [
+        "neutral net position ready stance, character holds tennis racket in right hand at chest height, alert",
+        "eyes spot incoming ball, body weight begins shifting to right foot, racket arm tenses",
+        "tiny compact backswing only, racket pulled back just a few inches beside body, no big windup",
+        "body weight loading, knees slightly bent, racket cocked back minimal, explosive readiness",
+        "forward punch begins, right arm with racket thrusting forward sharply from compact position",
+        "racket arm punches forward at speed, contact point just in front of body, impact expression",
+        "contact made, racket face flat and firm, arm locked in compact extension, sharp stop motion",
+        "hold contact position, racket firmly extended forward, arm nearly straight, crisp punch held",
+        "hold volley stop position, frozen at contact point, racket in right hand extended firm",
+        "hold firm volley position, wrist locked, racket face square, concentrated face",
+        "minimal follow-through, arm pushes slightly further forward just inches past contact",
+        "racket arm begins to pull back to ready position from extended point",
+        "right arm returns racket to chest-height ready position, body resetting",
+        "body weight redistributes back to center, racket back at chest height",
+        "character back at alert net position, racket in right hand ready, quick sharp eyes",
+        "neutral net ready pose identical to frame 1, racket in right hand, ready for loop"
+      ]
+    },
+    {
+      "id": "point_celebrate",
+      "label": "포인트",
+      "textVariants": [
+        "예스!",
+        "내 포인트!",
+        "컴온!!"
+      ],
+      "prompt": "tennis player bursting with joy after winning a point, fist pump and mini jump celebration",
+      "animationPrompt": "character holds tennis racket in right hand throughout, explosive fist pump as both feet briefly leave the ground, right arm with racket thrusting skyward while left fist pumps, landing with triumphant wide grin and fired-up energy",
+      "motionPreset": "jump",
+      "frames": [
+        "neutral standing pose, character holds tennis racket in right hand at side, calm centered expression",
+        "point won, eyes light up, right arm with racket begins rising, left arm balling into fist",
+        "both arms accelerating upward, knees bending slightly for jump preparation, big smile emerging",
+        "explosive launch upward, both feet leaving ground, right arm with racket thrusting skyward",
+        "fully airborne, right arm with racket pumped high overhead, left fist pumped, peak joy expression",
+        "at jump peak, racket in right hand raised overhead, mouth open in triumphant shout",
+        "hold peak jump celebration, racket overhead, both arms pumped, fired-up face",
+        "begin descent, arms starting to lower, feet approaching ground, grin still at full",
+        "feet land, knees absorb impact, right arm with racket still raised, celebrating",
+        "upright from landing, right arm with racket held high, pumped victorious expression",
+        "both arms lower slightly, racket still in right hand raised, savoring the moment",
+        "body settles upright, racket lowering to side, satisfied smile remains",
+        "character stands tall, racket at side in right hand, glowing confident expression",
+        "body centered and upright, racket in right hand, expression settling to ready",
+        "neutral standing pose, racket in right hand, composed and ready",
+        "neutral standing pose identical to frame 1, racket in right hand, ready for loop"
+      ]
+    },
+    {
+      "id": "double_fault",
+      "label": "더폴트",
+      "textVariants": [
+        "또 더폴!",
+        "서브가 왜",
+        "아이씨..."
+      ],
+      "prompt": "tennis player devastated after a double fault, shoulders slumped and head hanging in disbelief",
+      "animationPrompt": "character holds tennis racket in right hand throughout, shoulders slump forward and head droops down in defeat, racket tip dropping toward the ground as whole body sags with the weight of the double fault disappointment",
+      "motionPreset": "droop",
+      "frames": [
+        "neutral standing pose, character holds tennis racket in right hand upright, normal ready expression",
+        "second serve fault just called, expression flickers from hope to disbelief",
+        "shoulders begin to slump downward, head starting to drop, racket angle tilting down",
+        "shoulders fully slumped forward, head drooping low, racket in right hand dropping tip toward ground",
+        "body at peak slump, head hanging down, racket tip nearly touching ground, defeated expression",
+        "hold peak slump, racket tip brushing ground, maximum disappointment face, body sagging",
+        "hold defeated slump, character frozen in misery, racket dangling at side",
+        "hold slump position, exhale visible, racket still drooping low in right hand",
+        "left hand reaches up to cover face in disbelief while right holds drooping racket",
+        "left hand slides down face in exasperation, shoulders still slumped",
+        "body very slowly begins to straighten, racket lifting slightly from ground",
+        "shoulders lifting slightly, head still low, racket angling back upward in right hand",
+        "body halfway back to upright, resigned expression replacing acute pain",
+        "body mostly upright, racket back to side in right hand, grim acceptance face",
+        "neutral standing pose almost restored, racket in right hand, steeling expression",
+        "neutral pose identical to frame 1, racket in right hand, ready for loop"
+      ]
+    },
+    {
+      "id": "drop_shot",
+      "label": "드롭샷",
+      "textVariants": [
+        "살짝 툭!",
+        "네트 앞에",
+        "드롭샷~"
+      ],
+      "prompt": "tennis player hitting a delicate drop shot, gentle soft touch with racket, sly sneaky grin",
+      "animationPrompt": "character holds tennis racket in right hand throughout, right arm extends forward gently with a soft delicate slice motion, racket face opening as the arm barely moves, body language conspiratorial and sly as if executing a secret weapon shot",
+      "motionPreset": "plead",
+      "frames": [
+        "neutral ready stance, character holds tennis racket in right hand at waist height, slight sly expression",
+        "right arm begins to extend forward slowly and softly, racket face beginning to open",
+        "arm extends further with delicate touch, wrist slightly laid back to open racket face",
+        "racket face fully open, arm extending forward gently, soft slice motion beginning",
+        "gentle contact point, racket barely grazing through the ball with a soft caressing motion",
+        "hold contact position, racket open-faced at contact, light feathery touch expression",
+        "minimal follow-through, arm extends just slightly past contact with soft wrist flick",
+        "arm holds extended position, racket open-faced, sneaky satisfied grin spreading",
+        "sly grin fully formed, left hand covering mouth in cheeky secrecy, racket held out right",
+        "character glances toward where ball will land with knowing smirk, racket in right hand",
+        "arm begins to lower back toward ready position, cheeky satisfaction expression",
+        "arm lowering further, racket in right hand returning to waist level, smug look",
+        "body resettles to ready position, racket back at waist in right hand, pleased expression",
+        "character stands centered and satisfied, racket in right hand, small self-congratulatory nod",
+        "neutral ready stance restored, racket in right hand, composed with hint of smirk",
+        "neutral pose identical to frame 1, racket in right hand, ready for loop"
+      ]
+    },
+    {
+      "id": "ready_match",
+      "label": "경기준비",
+      "textVariants": [
+        "오늘 각!",
+        "준비됐다",
+        "레디!"
+      ],
+      "prompt": "tennis player stretching and warming up before a match, energized and pumped-up expression",
+      "animationPrompt": "character holds tennis racket in right hand throughout, both arms stretch overhead with racket rising high, body elongating in a big warm-up stretch motion, shaking out tension and bouncing slightly on feet in energetic pre-match anticipation",
+      "motionPreset": "stretch",
+      "frames": [
+        "neutral standing pose, character holds tennis racket in right hand, relaxed pre-match posture",
+        "both arms begin to lift upward, racket in right hand rising, body preparing to stretch",
+        "arms rising to shoulder height, racket lifted, body beginning to elongate upward",
+        "arms extending overhead, racket lifted high in right hand, body stretching tall",
+        "peak stretch, both arms fully extended overhead, racket at highest point, body fully elongated",
+        "hold peak stretch, racket overhead in right hand, big yawning energized face, torso lengthened",
+        "hold stretch peak, body fully extended, racket held high, pumped-up pre-match energy",
+        "arms begin to lower from stretch, racket descending, body returning to normal height",
+        "arms at shoulder height on way down, racket in right hand lowering, loose wrist shake",
+        "both arms lowering back to sides, racket returning to side, bouncing on toes slightly",
+        "feet bouncing lightly on toes in place, racket in right hand at side, fired-up energy",
+        "bounce settles, character stands tall with racket in right hand, bright confident eyes",
+        "body centered and energized, racket at side in right hand, game face expression",
+        "neutral standing pose nearly restored, racket in right hand, ready and focused",
+        "neutral standing pose, racket in right hand, composed and ready to compete",
+        "neutral pose identical to frame 1, racket in right hand, ready for loop"
+      ]
+    },
+    {
+      "id": "blame_racket",
+      "label": "라켓탓",
+      "textVariants": [
+        "라켓 탓!",
+        "줄이 문제",
+        "스트링 교체!"
+      ],
+      "prompt": "tennis player examining their racket accusingly after an error, blaming the equipment with frustrated expression",
+      "animationPrompt": "character holds tennis racket in right hand throughout, raises racket up with both hands to inspect it accusingly, shaking the racket frame slightly and squinting at the strings with dramatic blame-shifting frustration expression",
+      "motionPreset": "shake",
+      "frames": [
+        "neutral standing pose, character holds tennis racket in right hand, slightly frustrated expression",
+        "miss just happened, right arm raises racket upward toward eye level to inspect",
+        "both hands grip racket, holding it up between face and viewer, squinting at strings",
+        "face close to racket strings, peering through them with accusatory investigative squint",
+        "left hand points at specific string, dramatic accusation face toward the racket",
+        "racket shakes slightly in both hands with frustrated tremor, blaming vibration",
+        "racket shakes more, both hands gripping with exasperation, accusatory scowl deepens",
+        "hold shaking racket at eye level, maximum blame-the-equipment expression",
+        "racket stops shaking, character stares at it with dramatic disappointed glare",
+        "left hand releases racket, right arm begins lowering racket back down",
+        "racket lowering to waist level in right hand, resigned disgruntled expression",
+        "character gives racket one final disappointed look, shaking head slowly",
+        "right arm hangs racket at side, resigned accepting posture, still slightly grumpy",
+        "body settled, racket at side in right hand, philosophical resigned expression",
+        "neutral standing pose restored, racket in right hand, steeling for next point",
+        "neutral pose identical to frame 1, racket in right hand, ready for loop"
+      ]
+    },
+    {
+      "id": "cheer",
+      "label": "응원",
+      "textVariants": [
+        "파이팅!!",
+        "할 수 있어",
+        "나이스샷!"
+      ],
+      "prompt": "tennis player cheering energetically for a teammate or themselves, arms waving with supportive enthusiasm",
+      "animationPrompt": "character holds tennis racket in right hand throughout, left arm waves enthusiastically side-to-side while right arm with racket raises and pumps in support, body staying centered while projecting loud cheerful energy",
+      "motionPreset": "wave",
+      "frames": [
+        "neutral standing pose, character holds tennis racket in right hand at side, warm ready expression",
+        "left arm begins to lift, right arm with racket starting to rise slightly, cheerful energy building",
+        "left arm reaches waist height waving, right arm with racket lifted to chest height",
+        "left hand waves to the left, right arm with racket raised and slightly pumped",
+        "left hand waves back to center, right arm with racket steady at chest height",
+        "left hand waves to the right, right arm with racket gives small upward pump",
+        "left hand waves back to center, right arm with racket settling at chest height",
+        "left hand waves left again in second wave cycle, right arm with racket maintained high",
+        "left hand waves back to center, big encouraging grin, right arm with racket raised",
+        "left hand waves right again, right arm with racket gives enthusiastic pump upward",
+        "both arms at peak cheer energy, racket in right hand pumped, left hand waving",
+        "left arm begins to lower, right arm with racket starting to lower toward side",
+        "both arms lowering, expression remaining warm and supportive",
+        "both arms almost back at sides, racket in right hand returning to natural position",
+        "neutral standing pose, racket in right hand, warm supportive smile remaining",
+        "neutral pose identical to frame 1, racket in right hand, ready for loop"
+      ]
+    },
+    {
+      "id": "protest",
+      "label": "항의",
+      "textVariants": [
+        "선 위야!",
+        "아웃 아냐",
+        "심판!!"
+      ],
+      "prompt": "tennis player passionately protesting a line call, pointing urgently at the court with disbelief and indignation",
+      "animationPrompt": "character holds tennis racket in right hand throughout, left arm points dramatically and urgently toward where the ball landed, body leans forward with insistence, head shaking in disbelief and mouth open in protest to the umpire",
+      "motionPreset": "shake",
+      "frames": [
+        "neutral standing pose, character holds tennis racket in right hand, normal expression",
+        "questionable call just made, eyes widen in disbelief, left arm beginning to rise",
+        "left arm extending to point at court, mouth opening in protest, right arm with racket tensing",
+        "left hand pointing urgently and emphatically at the court line, indignant expression",
+        "full protest pose, left hand pointing hard at court, mouth open shouting, leaning forward",
+        "head shaking left-right while left hand still points, incredulous outraged face",
+        "head shake peaks, body leaning forward, left hand jabbing point at court repeatedly",
+        "hold protest peak, left hand pointing, mouth open, right hand with racket gesturing up",
+        "right arm with racket rises toward umpire in appeal gesture, left still pointing at court",
+        "both arms making case, racket in right hand raised toward umpire, left pointing at spot",
+        "arms begin to lower, expression transitioning from outrage to resigned frustration",
+        "left arm lowering from point, right arm with racket lowering, deep exhale expression",
+        "both arms lowering to sides, racket in right hand, frustrated acceptance settling in",
+        "body straightening, racket at side, tight-lipped suppressed frustration expression",
+        "neutral standing pose almost restored, racket in right hand, controlled anger face",
+        "neutral pose identical to frame 1, racket in right hand, ready for loop"
+      ]
+    },
+    {
+      "id": "return_ace",
+      "label": "리턴에이스",
+      "textVariants": [
+        "리턴 에이스!",
+        "받아쳤다!",
+        "반사!"
+      ],
+      "prompt": "tennis player pulling off an incredible return ace, explosive reactive swing with pure shock and joy",
+      "animationPrompt": "character holds tennis racket in right hand throughout, starts in low split-step receiving stance then explosively reacts with a powerful return swing, body bouncing with disbelief and joy at having returned an impossible serve for a winner",
+      "motionPreset": "bounce",
+      "frames": [
+        "ready return stance, character holds tennis racket in right hand in front of body, focused split-step crouch",
+        "ball incoming, body reacts, knees bending deeper into split-step, racket beginning to move",
+        "explosive reaction begins, body driving to one side, right arm pulling racket back for return",
+        "full-body lunge, right arm with racket in full backswing, extending to reach the serve",
+        "contact, racket meets ball at full extension with explosive reactive swing, shocked expression",
+        "follow-through of return, racket sweeping across body, eyes wide in disbelief",
+        "follow-through completes, ball just launched back as a winner, shocked-joy expression",
+        "realization hits, eyes go wide, mouth dropping open in pure disbelief-joy",
+        "body bounces upward with joy, racket in right hand rising, shocked celebration begins",
+        "fully bouncing with joy, racket raised, can't believe it worked expression at peak",
+        "second bounce of joy, both arms rising, racket in right hand pumped, elation overflows",
+        "landing from bounce, racket in right hand raised high, triumphant disbelief face",
+        "arms settling, racket in right hand still raised slightly, savoring the moment",
+        "body settling, racket lowering to side in right hand, glowing satisfied expression",
+        "neutral return ready stance restoring, racket in right hand, confident smile",
+        "neutral ready pose identical to frame 1, racket in right hand, ready for loop"
+      ]
+    },
+    {
+      "id": "exhausted",
+      "label": "탈진",
+      "textVariants": [
+        "다리가...",
+        "못 움직여",
+        "탈진이닷"
+      ],
+      "prompt": "tennis player completely exhausted after a long rally or match, bent over with hands on knees gasping",
+      "animationPrompt": "character holds tennis racket in right hand throughout, body bends forward deeply with right hand using racket as a leaning support touching the ground, left hand on knee, head hanging low and breathing heavily in full exhaustion",
+      "motionPreset": "droop",
+      "frames": [
+        "upright standing pose, character holds tennis racket in right hand, already tired expression",
+        "body begins to bend forward at waist, racket in right hand lowering toward ground",
+        "body bends further, right arm with racket extending downward as makeshift support prop",
+        "racket tip touching ground as support, body bent well forward, left hand reaching to knee",
+        "body at full exhausted droop, bent forward, racket on ground as support, head hanging low",
+        "hold full exhaustion pose, racket propped on ground right hand, left hand on left knee, gasping",
+        "hold exhausted position, heavy breathing visible, head still hanging low, body sagging",
+        "hold droop, racket supporting right side, body barely holding itself up, spent expression",
+        "small recovery attempt, head lifts slightly but body still very bent, still breathing hard",
+        "head lifts a bit more, eyes glazed with effort, body still bowed but slightly less forward",
+        "body very slowly straightening, racket lifting from ground but still low, gradual recovery",
+        "body halfway straightened, racket in right hand rising, exhausted but collecting self",
+        "body three-quarters straightened, racket at side in right hand, still wiped-out face",
+        "body almost fully upright, racket at side in right hand, recovering-but-dead expression",
+        "neutral upright pose restored, racket in right hand, hollow exhausted but upright face",
+        "neutral pose identical to frame 1, racket in right hand, ready for loop"
+      ]
+    },
+    {
+      "id": "six_love",
+      "label": "육빵",
+      "textVariants": [
+        "육빵이닷!",
+        "6대0!",
+        "육빵 선물"
+      ],
+      "prompt": "tennis player ecstatic about winning 6-0, popping with pure joy and doing a celebratory flourish",
+      "animationPrompt": "character holds tennis racket in right hand throughout, explosive pop of joy with body expanding outward and upward, arms spreading wide with racket raised, face in total bliss at the 6-love victory, then settling back with supreme satisfaction",
+      "motionPreset": "pop",
+      "frames": [
+        "neutral standing pose, character holds tennis racket in right hand at side, composed expression",
+        "match point 6-0 just registered, eyes light up, body beginning to expand with joy",
+        "arms spreading outward, racket in right hand rising, mouth opening in elated shout",
+        "arms fully spread wide, racket raised in right hand, body expanding outward at peak pop",
+        "peak expansion, arms spread maximum width, racket overhead in right hand, face pure bliss",
+        "hold peak joy explosion, racket high in right hand, maximum 6-love celebration expression",
+        "hold peak pop, arms wide, racket raised, body fully expanded, grinning ear to ear",
+        "hold celebration peak, left hand flashing six fingers, right hand holding racket up",
+        "body begins to settle from peak expansion, arms starting to lower, grin still huge",
+        "arms lowering toward sides, racket in right hand descending, satisfaction radiating",
+        "both arms nearly at sides, racket in right hand at hip level, blissful satisfied smile",
+        "body fully settled, racket at side in right hand, supreme contentment expression",
+        "standing tall with racket at side, glowing with 6-love victory satisfaction",
+        "neutral standing pose nearly restored, racket in right hand, residual smile on face",
+        "neutral standing pose, racket in right hand, quietly confident champion expression",
+        "neutral pose identical to frame 1, racket in right hand, ready for loop"
+      ]
+    },
+    {
+      "id": "walk_baseline",
+      "label": "베이스라인",
+      "textVariants": [
+        "루틴이야",
+        "집중 루틴",
+        "점사이..."
+      ],
+      "prompt": "tennis player doing their between-point baseline walk routine, bouncing ball and focused mental reset",
+      "animationPrompt": "character holds tennis racket in right hand throughout, marches deliberately from one side to the other in the baseline area with purposeful slow steps, right hand with racket swinging naturally with stride, eyes downcast in focused mental reset between points",
+      "motionPreset": "march",
+      "frames": [
+        "neutral standing pose, character holds tennis racket in right hand at side, composed focused face",
+        "left foot steps forward, right arm with racket swings back naturally with stride",
+        "right foot steps forward, left arm swings forward, right arm with racket swings forward",
+        "left foot steps forward, purposeful deliberate march pace, eyes downward in focus",
+        "right foot steps forward, right arm with racket swinging naturally, mental reset expression",
+        "left foot steps, head slightly bowed in between-point concentration routine",
+        "right foot steps, body turning slightly as if walking along baseline direction",
+        "left foot steps, right arm with racket swinging, deep breath visible in posture",
+        "right foot steps, body aligned along baseline, focused inward expression",
+        "left foot steps, march rhythm steady and deliberate, composure building",
+        "both feet pause at endpoint of baseline walk, right arm with racket settling",
+        "body stopped and turning to face back toward center, racket in right hand at side",
+        "character stands at ready position, racket in right hand, mental reset complete",
+        "feet settle into ready stance, racket in right hand at ready position, focused look",
+        "neutral standing ready pose, racket in right hand, calm composed game face",
+        "neutral pose identical to frame 1, racket in right hand, ready for loop"
+      ]
+    }
+  ]
+}

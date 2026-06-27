@@ -269,7 +269,12 @@ button:disabled {
   object-fit: contain;
 }
 
-.style-grid,
+.style-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 12px;
+}
+
 .asset-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
@@ -287,7 +292,6 @@ button:disabled {
 }
 
 .text-button,
-.style-button,
 .type-button,
 .primary,
 .secondary {
@@ -298,6 +302,54 @@ button:disabled {
   color: var(--ink);
   padding: 10px 14px;
   font-weight: 800;
+}
+
+.style-button {
+  min-height: 72px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: #fff;
+  color: var(--ink);
+  padding: 12px 16px;
+  text-align: left;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.style-emoji {
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  border-radius: 14px;
+  background: var(--bg);
+  font-size: 26px;
+  transition: transform 0.2s ease;
+}
+
+.style-button:hover .style-emoji {
+  transform: scale(1.1) rotate(-5deg);
+}
+
+.style-info {
+  display: grid;
+  gap: 2px;
+}
+
+.style-info strong {
+  font-size: 15px;
+  font-weight: 800;
+}
+
+.style-info small {
+  display: block;
+  font-size: 11px;
+  color: var(--muted);
+  font-weight: 500;
+  line-height: 1.3;
 }
 
 .text-button {

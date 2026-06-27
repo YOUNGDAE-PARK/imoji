@@ -37,19 +37,36 @@ def fit_panel_to_canvas(panel, size=320):
     return canvas
 
 
-def foreground_mask(image):
-    """Create binary mask of non-background pixels."""
-    pixels = image.convert("RGBA").load()
+def get_background_color(image):
+    """Sample corners and edges to find the most likely background color."""
+    w, h = image.size
+    pixels = image.convert("RGB").load()
+    samples = [
+        pixels[0, 0], pixels[w-1, 0], pixels[0, h-1], pixels[w-1, h-1],
+        pixels[w//2, 0], pixels[w//2, h-1], pixels[0, h//2], pixels[w-1, h//2]
+    ]
+    # Use median to avoid outliers (like a character pixel touching the edge)
+    r = sorted([s[0] for s in samples])[len(samples)//2]
+    g = sorted([s[1] for s in samples])[len(samples)//2]
+    b = sorted([s[2] for s in samples])[len(samples)//2]
+    return (r, g, b)
+
+
+def foreground_mask(image, tolerance=30):
+    """Create binary mask of non-background pixels using dynamic background color."""
+    rgba = image.convert("RGBA")
+    pixels = rgba.load()
     width, height = image.size
     mask = bytearray(width * height)
+    bg_r, bg_g, bg_b = get_background_color(image)
 
     for y in range(height):
         for x in range(width):
             r, g, b, a = pixels[x, y]
-            # Detect background: transparent or white-ish with low color variation
+            # Background if: transparent OR close to sampled background color
             is_background = (
-                a < 24 or  # Fully transparent
-                (r > 240 and g > 240 and b > 240 and max(r, g, b) - min(r, g, b) < 15)  # Near-white
+                a < 32 or 
+                (abs(r - bg_r) < tolerance and abs(g - bg_g) < tolerance and abs(b - bg_b) < tolerance)
             )
             if not is_background:
                 mask[y * width + x] = 1
@@ -57,16 +74,17 @@ def foreground_mask(image):
     return mask
 
 
-def remove_white_background(image, threshold=220, max_delta=25):
-    """AI 생성 스프라이트 시트의 흰색/밝은 배경 픽셀을 투명(alpha=0)으로 변환"""
+def remove_white_background(image, tolerance=35):
+    """스프라이트 시트의 배경 픽셀을 투명(alpha=0)으로 변환 (다이내믹 컬러 탐지)"""
     rgba = image.convert("RGBA")
     pixels = rgba.load()
     w, h = rgba.size
+    bg_r, bg_g, bg_b = get_background_color(image)
+
     for y in range(h):
         for x in range(w):
             r, g, b, a = pixels[x, y]
-            if a > 0 and r > threshold and g > threshold and b > threshold \
-               and max(r, g, b) - min(r, g, b) < max_delta:
+            if a > 0 and abs(r - bg_r) < tolerance and abs(g - bg_g) < tolerance and abs(b - bg_b) < tolerance:
                 pixels[x, y] = (r, g, b, 0)
     return rgba
 
@@ -135,67 +153,76 @@ def character_bbox(image):
     return max(components, key=score)["bbox"]
 
 
-def frame_metrics(frame):
-    bbox = character_bbox(frame)
-    if not bbox:
-        width, height = frame.size
-        bbox = (0, 0, width, height)
-
-    left, top, right, bottom = bbox
-    return {
-        "bbox": bbox,
-        "center_x": (left + right) / 2,
-        "center_y": (top + bottom) / 2,
-        "height": max(1, bottom - top),
-    }
-
-
 def clamp(value, minimum, maximum):
     return max(minimum, min(maximum, value))
 
 
+def frame_metrics(frame):
+    width, height = frame.size
+    mask = foreground_mask(frame)
+    bbox = character_bbox(frame)
+    if not bbox:
+        return {
+            "bbox": (0, 0, width, height),
+            "bottom_center_x": width / 2,
+            "bottom_y": height,
+            "height": height
+        }
+
+    left, top, right, bottom = bbox
+    
+    # Bottom-Anchor: Identify the horizontal center of the bottom 30% of the character
+    points = [(index % width, index // width) for index, value in enumerate(mask) if value]
+    if not points:
+        return {"bbox": bbox, "bottom_center_x": (left + right) / 2, "bottom_y": bottom, "height": max(1, bottom - top)}
+    
+    bottom_threshold = bottom - (bottom - top) * 0.3
+    bottom_points = [p for p in points if p[1] >= bottom_threshold]
+    
+    if bottom_points:
+        bottom_center_x = median([p[0] for p in bottom_points])
+    else:
+        bottom_center_x = (left + right) / 2
+
+    return {
+        "bbox": bbox,
+        "bottom_center_x": bottom_center_x,
+        "bottom_y": bottom,
+        "height": max(1, bottom - top),
+    }
+
+
 def calculate_stable_target(all_metrics):
-    """Calculate target metrics using percentile-based filtering to reduce outlier impact."""
+    """Calculate target metrics focusing on a stable bottom pivot."""
     if not all_metrics:
-        return (160, 160, 200)
+        return (160, 300, 200)
     
-    centers_x = sorted([m["center_x"] for m in all_metrics])
-    centers_y = sorted([m["center_y"] for m in all_metrics])
-    heights = sorted([m["height"] for m in all_metrics])
+    # Use median for stable bottom anchor
+    target_bottom_x = median([m["bottom_center_x"] for m in all_metrics])
+    target_bottom_y = median([m["bottom_y"] for m in all_metrics])
+    target_height = median([m["height"] for m in all_metrics])
     
-    # Use 25th-75th percentile range to reduce outlier impact
-    n = len(all_metrics)
-    q1_idx = max(0, n // 4 - 1)
-    q3_idx = min(n - 1, (3 * n) // 4)
-    
-    # Use median of middle 50% range
-    target_center_x = (centers_x[q1_idx] + centers_x[q3_idx]) / 2
-    target_center_y = (centers_y[q1_idx] + centers_y[q3_idx]) / 2
-    target_height = (heights[q1_idx] + heights[q3_idx]) / 2
-    
-    return (target_center_x, target_center_y, target_height)
+    return (target_bottom_x, target_bottom_y, target_height)
 
 
 def normalize_frame(frame, metrics, target, size=320, frame_index=0):
-    target_center_x, target_center_y, target_height = target
+    target_bottom_x, target_bottom_y, target_height = target
     bbox = metrics["bbox"]
     
-    # Very strict scale bounds to prevent jitter (0.98-1.02 for minimal movement)
-    scale = clamp(target_height / metrics["height"], 0.98, 1.02)
+    # Scale correction is very minimal to avoid distortion
+    scale = clamp(target_height / metrics["height"], 0.99, 1.01)
     scaled_size = (max(1, round(frame.width * scale)), max(1, round(frame.height * scale)))
     scaled = frame.resize(scaled_size, Image.Resampling.LANCZOS)
 
-    # Calculate placement based on target position
-    left = round(target_center_x - metrics["center_x"] * scale)
-    top = round(target_center_y - metrics["center_y"] * scale)
+    # Align based on the BOTTOM pivot point
+    left = round(target_bottom_x - metrics["bottom_center_x"] * scale)
+    top = round(target_bottom_y - metrics["bottom_y"] * scale)
 
-    # Very tight margin constraint to minimize any position drift (30px per side)
-    margin = 30
+    # Safe margin check
+    margin = 15
     fg_left, fg_top, fg_right, fg_bottom = bbox
-    left = max(left, round(margin - fg_left * scale))
-    top = max(top, round(margin - fg_top * scale))
-    left = min(left, round(size - margin - fg_right * scale))
-    top = min(top, round(size - margin - fg_bottom * scale))
+    left = clamp(left, round(margin - fg_left * scale), round(size - margin - fg_right * scale))
+    top = clamp(top, round(margin - fg_top * scale), round(size - margin - fg_bottom * scale))
 
     # Create transparent background
     canvas = Image.new("RGBA", (size, size), (0, 0, 0, 0))
@@ -214,8 +241,8 @@ def stabilize_loop_frames(rgba_frames):
     
     # Create interpolated target that averages frame 0 and frame 15
     loop_target = (
-        (metrics_0["center_x"] + metrics_15["center_x"]) / 2,
-        (metrics_0["center_y"] + metrics_15["center_y"]) / 2,
+        (metrics_0["bottom_center_x"] + metrics_15["bottom_center_x"]) / 2,
+        (metrics_0["bottom_y"] + metrics_15["bottom_y"]) / 2,
         (metrics_0["height"] + metrics_15["height"]) / 2
     )
     

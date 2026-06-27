@@ -5,12 +5,12 @@ import {
   ALLOWED_IMAGE_TYPES,
   FINAL_SITUATIONS,
   LETTERING_STYLES,
-  MAX_SELECTED_SITUATIONS,
   MAX_UPLOAD_BYTES,
-  MIN_SELECTED_SITUATIONS,
-  STYLE_PRESETS
+  MODES,
+  STYLE_PRESETS,
+  TENNIS_SITUATIONS
 } from "./constants";
-import { GenerationJob, TextOverlayMap } from "./types";
+import { GenerationJob, ModeId, TextOverlayMap } from "./types";
 import { ensureJobDirs, jobDir, jobFile, readJson, storageRoot, writeJson } from "./storage";
 import { ensureWorker } from "./worker";
 
@@ -20,7 +20,9 @@ export async function createJob(formData: FormData) {
   const file = formData.get("sketch");
   const styleId = String(formData.get("styleId") ?? "");
   const letteringStyleId = String(formData.get("letteringStyleId") ?? LETTERING_STYLES[0].id);
-  const selectedSituationIds = parseSelectedSituationIds(formData);
+  const modeId = (String(formData.get("modeId") ?? "general")) as ModeId;
+  const mode = MODES.find((m) => m.id === modeId) ?? MODES[0];
+  const selectedSituationIds = parseSelectedSituationIds(formData, mode.id);
   const textOverlays = parseTextOverlays(formData.get("textOverlays"), selectedSituationIds);
   const style = STYLE_PRESETS.find((item) => item.id === styleId);
   const letteringStyle = LETTERING_STYLES.find((item) => item.id === letteringStyleId);
@@ -31,7 +33,9 @@ export async function createJob(formData: FormData) {
   if (!ALLOWED_IMAGE_TYPES.includes(file.type)) throw new Error("PNG, JPG, WEBP, GIF 이미지만 업로드할 수 있습니다.");
   if (file.size > MAX_UPLOAD_BYTES) throw new Error("파일은 8MB 이하만 업로드할 수 있습니다.");
 
-  const id = crypto.randomUUID();
+  const nowStr = new Date().toISOString().replace(/[-:T]/g, "").split(".")[0];
+  const rand = crypto.randomUUID().slice(0, 6);
+  const id = `${nowStr}_${rand}`;
   await ensureJobDirs(id);
 
   const ext = extensionFor(file.type);
@@ -47,6 +51,8 @@ export async function createJob(formData: FormData) {
     letteringStyleId: letteringStyle.id,
     letteringStyleLabel: letteringStyle.label,
     letteringStylePrompt: letteringStyle.prompt,
+    modeId: mode.id,
+    modeLabel: mode.label,
     selectedSituationIds,
     textOverlays,
     uploadPath,
@@ -103,6 +109,8 @@ export function publicJob(job: GenerationJob) {
     styleLabel: job.styleLabel,
     letteringStyleId: job.letteringStyleId,
     letteringStyleLabel: job.letteringStyleLabel,
+    modeId: job.modeId,
+    modeLabel: job.modeLabel,
     characterProfile: job.characterProfile,
     error: job.error,
     finalAssets: job.finalAssets.map(assetForClient),
@@ -114,16 +122,18 @@ export function publicJob(job: GenerationJob) {
   };
 }
 
-export function selectedSituationsForJob(job: Pick<GenerationJob, "selectedSituationIds">) {
-  const selectedIds = job.selectedSituationIds?.length ? job.selectedSituationIds : [FINAL_SITUATIONS[0].id];
+export function selectedSituationsForJob(job: Pick<GenerationJob, "selectedSituationIds" | "modeId">) {
+  const situations = job.modeId === "tennis" ? TENNIS_SITUATIONS : FINAL_SITUATIONS;
+  const selectedIds = job.selectedSituationIds?.length ? job.selectedSituationIds : [situations[0].id];
   const selected = selectedIds
-    .map((id) => FINAL_SITUATIONS.find((situation) => situation.id === id))
-    .filter((situation): situation is (typeof FINAL_SITUATIONS)[number] => Boolean(situation));
+    .map((id) => situations.find((situation) => situation.id === id))
+    .filter((situation): situation is (typeof situations)[number] => Boolean(situation));
 
-  return selected.length ? selected : [FINAL_SITUATIONS[0]];
+  return selected.length ? selected : [situations[0]];
 }
 
-function parseSelectedSituationIds(formData: FormData) {
+function parseSelectedSituationIds(formData: FormData, modeId: ModeId) {
+  const situationsSource = modeId === "tennis" ? TENNIS_SITUATIONS : FINAL_SITUATIONS;
   const rawValues = formData.getAll("situationIds").flatMap((value) =>
     String(value)
       .split(",")
@@ -133,17 +143,17 @@ function parseSelectedSituationIds(formData: FormData) {
   const selectedIds = rawValues;
   const uniqueIds = new Set(selectedIds);
 
-  if (selectedIds.length < MIN_SELECTED_SITUATIONS) {
-    throw new Error(`이모지는 최소 ${MIN_SELECTED_SITUATIONS}개 이상 선택해주세요.`);
+  if (selectedIds.length < 1) {
+    throw new Error(`이모지는 최소 1개 이상 선택해주세요.`);
   }
-  if (selectedIds.length > MAX_SELECTED_SITUATIONS) {
-    throw new Error(`이모지는 최대 ${MAX_SELECTED_SITUATIONS}개까지 선택할 수 있습니다.`);
+  if (selectedIds.length > situationsSource.length) {
+    throw new Error(`이모지는 최대 ${situationsSource.length}개까지 선택할 수 있습니다.`);
   }
   if (uniqueIds.size !== selectedIds.length) {
     throw new Error("중복된 이모지 상황이 포함되어 있습니다.");
   }
 
-  const validIds = new Set<string>(FINAL_SITUATIONS.map((situation) => situation.id));
+  const validIds = new Set<string>(situationsSource.map((situation) => situation.id));
   const invalidId = selectedIds.find((id) => !validIds.has(id));
   if (invalidId) throw new Error(`지원하지 않는 이모지 상황입니다: ${invalidId}`);
 
@@ -210,6 +220,7 @@ function assetForClient(asset: GenerationJob["finalAssets"][number]) {
     typeId: asset.typeId,
     filename: asset.filename,
     mp4Filename: asset.mp4Filename,
+    fileSizeKb: asset.fileSizeKb,
     url: `/api/jobs/${asset.id.split(":")[0]}/assets/${encodeURIComponent(asset.id)}`
   };
 }

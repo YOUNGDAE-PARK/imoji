@@ -5,7 +5,7 @@
 import { ChangeEvent, PointerEvent, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { Download, ImagePlus, Loader2, Plus, RotateCcw, Sparkles, Trash2 } from "lucide-react";
-import { FINAL_SITUATIONS, LETTERING_STYLES, MAX_SELECTED_SITUATIONS, MIN_SELECTED_SITUATIONS, STYLE_PRESETS } from "@/lib/constants";
+import { FINAL_SITUATIONS, LETTERING_STYLES, MAX_SELECTED_SITUATIONS, MIN_SELECTED_SITUATIONS, MODES, STYLE_PRESETS, TENNIS_SITUATIONS } from "@/lib/constants";
 
 const CANVAS_SIZE = 320;
 
@@ -34,6 +34,7 @@ type ClientAsset = {
   displayText: string;
   typeId: "A" | "B" | "C";
   filename: string;
+  fileSizeKb?: number;
   url: string;
 };
 
@@ -44,6 +45,8 @@ type ClientJob = {
   styleLabel: string;
   letteringStyleId: string;
   letteringStyleLabel: string;
+  modeId?: string;
+  modeLabel?: string;
   characterProfile?: string;
   error?: string;
   finalAssets: ClientAsset[];
@@ -66,6 +69,7 @@ export default function Home() {
   const [previewUrl, setPreviewUrl] = useState<string>("");
   const [styleId, setStyleId] = useState<string>(STYLE_PRESETS[0].id);
   const [letteringStyleId, setLetteringStyleId] = useState<string>(LETTERING_STYLES[0].id);
+  const [modeId, setModeId] = useState<string>("general");
   const [selectedSituationIds, setSelectedSituationIds] = useState<string[]>([FINAL_SITUATIONS[0].id]);
   const [activeSituationId, setActiveSituationId] = useState<string>(FINAL_SITUATIONS[0].id);
   const [textOverlays, setTextOverlays] = useState<TextOverlayMap>({});
@@ -73,6 +77,18 @@ export default function Home() {
   const [job, setJob] = useState<ClientJob | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+
+  const currentSituations = modeId === "tennis" ? TENNIS_SITUATIONS : FINAL_SITUATIONS;
+  const maxSituations = currentSituations.length;
+
+  function switchMode(newModeId: string) {
+    setModeId(newModeId);
+    const mode = MODES.find((m) => m.id === newModeId) ?? MODES[0];
+    setSelectedSituationIds([mode.situations[0].id]);
+    setActiveSituationId(mode.situations[0].id);
+    setTextOverlays({});
+    setActiveTextItemId("");
+  }
 
   useEffect(() => {
     if (!job || job.status === "completed" || job.status === "failed") return;
@@ -88,14 +104,14 @@ export default function Home() {
 
   useEffect(() => {
     if (!selectedSituationIds.includes(activeSituationId)) {
-      setActiveSituationId(selectedSituationIds[0] ?? FINAL_SITUATIONS[0].id);
+      setActiveSituationId(selectedSituationIds[0] ?? currentSituations[0].id);
       setActiveTextItemId("");
     }
-  }, [activeSituationId, selectedSituationIds]);
+  }, [activeSituationId, selectedSituationIds, currentSituations]);
 
   const activeSituation = useMemo(
-    () => FINAL_SITUATIONS.find((situation) => situation.id === activeSituationId) ?? FINAL_SITUATIONS[0],
-    [activeSituationId]
+    () => currentSituations.find((situation) => situation.id === activeSituationId) ?? currentSituations[0],
+    [activeSituationId, currentSituations]
   );
   const activeOverlay = textOverlays[activeSituationId] ?? defaultOverlay(activeSituation.label);
   const activeItem = activeOverlay.items.find((item) => item.id === activeTextItemId) ?? activeOverlay.items[0];
@@ -114,8 +130,8 @@ export default function Home() {
       setError("스케치 파일을 첨부해주세요.");
       return;
     }
-    if (selectedSituationIds.length < MIN_SELECTED_SITUATIONS || selectedSituationIds.length > MAX_SELECTED_SITUATIONS) {
-      setError(`이모지는 ${MIN_SELECTED_SITUATIONS}~${MAX_SELECTED_SITUATIONS}개까지 선택할 수 있습니다.`);
+    if (selectedSituationIds.length < MIN_SELECTED_SITUATIONS || selectedSituationIds.length > maxSituations) {
+      setError(`이모지는 ${MIN_SELECTED_SITUATIONS}~${maxSituations}개까지 선택할 수 있습니다.`);
       return;
     }
 
@@ -125,6 +141,7 @@ export default function Home() {
     formData.append("sketch", file);
     formData.append("styleId", styleId);
     formData.append("letteringStyleId", letteringStyleId);
+    formData.append("modeId", modeId);
     selectedSituationIds.forEach((id) => formData.append("situationIds", id));
     formData.append("textOverlays", JSON.stringify(textOverlays));
 
@@ -149,14 +166,14 @@ export default function Home() {
         if (activeSituationId === id) setActiveSituationId(next[0]);
         return next;
       }
-      if (current.length >= MAX_SELECTED_SITUATIONS) return current;
+      if (current.length >= maxSituations) return current;
       setActiveSituationId(id);
       return [...current, id];
     });
   }
 
   function enableCustomOverlay(situationId = activeSituationId) {
-    const situation = FINAL_SITUATIONS.find((item) => item.id === situationId) ?? FINAL_SITUATIONS[0];
+    const situation = currentSituations.find((item) => item.id === situationId) ?? currentSituations[0];
     setTextOverlays((current) => {
       const existing = current[situationId];
       const next = existing?.items?.length ? existing : defaultOverlay(situation.label);
@@ -166,7 +183,7 @@ export default function Home() {
   }
 
   function resetOverlay(situationId = activeSituationId) {
-    const situation = FINAL_SITUATIONS.find((item) => item.id === situationId) ?? FINAL_SITUATIONS[0];
+    const situation = currentSituations.find((item) => item.id === situationId) ?? currentSituations[0];
     setTextOverlays((current) => ({ ...current, [situationId]: defaultOverlay(situation.label) }));
     setActiveTextItemId("");
   }
@@ -240,32 +257,33 @@ export default function Home() {
     <main className="site-shell">
       <TopNav active="create" />
 
-      <section className="hero-section">
-        <div className="hero-copy">
-          <span className="eyebrow">Sketch to KakaoTalk GIF</span>
-          <h1>내 캐릭터 스케치를 움직이는 이모티콘 키트로</h1>
-          <p>원본 캐릭터의 정체성을 유지하면서 상황별 GIF와 직접 배치한 문구를 한 번에 생성합니다.</p>
-        </div>
-        <div className="hero-status-card">
-          <Sparkles size={22} />
-          <strong>{job ? statusText[job.status] : "Ready"}</strong>
-          <span>{job ? `${job.finalCount}개 이모티콘 작업` : "스케치를 업로드해 시작하세요"}</span>
-        </div>
-      </section>
-
-      <section className="workflow-strip" aria-label="생성 단계">
-        {["스케치 업로드", "스타일 선택", "문구 편집", "GIF 다운로드"].map((item, index) => (
-          <div className="workflow-card" key={item}>
-            <span>{String(index + 1).padStart(2, "0")}</span>
-            <strong>{item}</strong>
-          </div>
-        ))}
-      </section>
-
       <section className="main content-stack">
+        <div className="status-bar" style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 24px', borderRadius: '16px', background: 'var(--panel)', border: '1px solid var(--line)' }}>
+          <Sparkles size={18} style={{ color: 'var(--sun)' }} />
+          <strong style={{ fontSize: '16px' }}>{job ? statusText[job.status] : "Ready"}</strong>
+          <span style={{ color: 'var(--muted)', fontSize: '14px' }}>{job ? `${job.finalCount}개 이모티콘 작업` : "스케치를 업로드해 시작하세요"}</span>
+        </div>
+
         {!job && (
           <>
             <section className="panel upload-grid feature-panel">
+              <div className="section-label">이모지 모드</div>
+              <div className="style-grid">
+                {MODES.map((mode) => (
+                  <button
+                    className={`style-button ${modeId === mode.id ? "active" : ""}`}
+                    key={mode.id}
+                    type="button"
+                    onClick={() => switchMode(mode.id)}
+                  >
+                    <span className="style-emoji">{mode.emoji}</span>
+                    <div className="style-info">
+                      <strong>{mode.label}</strong>
+                      <small>{mode.description}</small>
+                    </div>
+                  </button>
+                ))}
+              </div>
               <label className="drop">
                 {previewUrl ? (
                   <img className="preview-img" src={previewUrl} alt="업로드한 스케치 미리보기" />
@@ -284,7 +302,11 @@ export default function Home() {
                 <div className="style-grid">
                   {STYLE_PRESETS.map((style) => (
                     <button className={`style-button ${styleId === style.id ? "active" : ""}`} key={style.id} type="button" onClick={() => setStyleId(style.id)}>
-                      {style.label}
+                      <span className="style-emoji">{style.emoji}</span>
+                      <div className="style-info">
+                        <strong>{style.label}</strong>
+                        <small>{style.sampleDescription}</small>
+                      </div>
                     </button>
                   ))}
                 </div>
@@ -292,24 +314,28 @@ export default function Home() {
                 <div className="style-grid">
                   {LETTERING_STYLES.map((style) => (
                     <button className={`style-button ${letteringStyleId === style.id ? "active" : ""}`} key={style.id} type="button" onClick={() => setLetteringStyleId(style.id)}>
-                      {style.label}
+                      <span className="style-emoji">{style.emoji}</span>
+                      <div className="style-info">
+                        <strong>{style.label}</strong>
+                        <small>{style.sampleDescription}</small>
+                      </div>
                     </button>
                   ))}
                 </div>
                 <div className="section-label">이모지 상황 선택</div>
                 <div className="selection-summary">
                   <span>
-                    {selectedCount}개 선택됨 / 최대 {MAX_SELECTED_SITUATIONS}개 · 직접 배치 {customOverlayCount}개
+                    {selectedCount}개 선택됨 / 최대 {maxSituations}개 · 직접 배치 {customOverlayCount}개
                   </span>
-                  <button className="text-button" type="button" onClick={() => setSelectedSituationIds(FINAL_SITUATIONS.map((situation) => situation.id))}>
+                  <button className="text-button" type="button" onClick={() => setSelectedSituationIds(currentSituations.map((situation) => situation.id))}>
                     전체 선택
                   </button>
-                  <button className="text-button" type="button" onClick={() => setSelectedSituationIds([FINAL_SITUATIONS[0].id])}>
+                  <button className="text-button" type="button" onClick={() => setSelectedSituationIds([currentSituations[0].id])}>
                     기본 1개
                   </button>
                 </div>
                 <div className="situation-grid">
-                  {FINAL_SITUATIONS.map((situation) => {
+                  {currentSituations.map((situation) => {
                     const checked = selectedSituationIds.includes(situation.id);
                     const custom = textOverlays[situation.id]?.mode === "custom";
                     return (
@@ -455,10 +481,24 @@ export default function Home() {
                         <span>
                           {asset.situationLabel} · {asset.displayText}
                         </span>
-                        <span>GIF</span>
+                        <span style={{ display: "flex", alignItems: "center", gap: 4 }}>
+                          {asset.fileSizeKb != null && (
+                            <span style={{
+                              fontSize: "0.7rem",
+                              color: asset.fileSizeKb > 300 ? "#d61e1e" : "#888",
+                              fontWeight: asset.fileSizeKb > 300 ? 700 : 400,
+                            }}>
+                              {asset.fileSizeKb}KB{asset.fileSizeKb > 300 ? " ⚠" : ""}
+                            </span>
+                          )}
+                          <span>GIF</span>
+                        </span>
                       </div>
                     </div>
                   ))}
+                </div>
+                <div style={{ fontSize: "0.78rem", color: "#888", padding: "4px 2px", lineHeight: 1.5 }}>
+                  카카오 스튜디오 제출: <strong>ZIP &gt; kakao/</strong> 폴더의 GIF 파일 사용 · 360×360px · 300KB 이하 권장 · 애니콘 24종 필요 (부족분은 <strong>png/</strong> 폴더로 대체 가능)
                 </div>
                 <div className="actions">
                   <a className="secondary" href={`/api/jobs/${job.id}/download`}>

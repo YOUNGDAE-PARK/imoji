@@ -14,10 +14,19 @@ export async function GET(_request: Request, { params }: { params: { jobId: stri
     }
 
     const zip = new JSZip();
+    const kakaoFolder = zip.folder("kakao");   // 카카오 스튜디오 제출용 GIF (360×360)
+    const pngFolder   = zip.folder("png");     // 정적 PNG 썸네일 (스티콘 제출 또는 GIF 대체용)
+    const mp4Folder   = zip.folder("mp4");     // 개인 SNS 공유용 MP4
+
     for (const asset of job.finalAssets) {
-      zip.file(asset.filename, await readFile(asset.path));
+      if (existsSync(asset.path)) {
+        kakaoFolder!.file(asset.filename, await readFile(asset.path));
+      }
+      if (asset.thumbPath && existsSync(asset.thumbPath)) {
+        pngFolder!.file(asset.thumbFilename!, await readFile(asset.thumbPath));
+      }
       if (asset.mp4Filename && asset.mp4Path && existsSync(asset.mp4Path)) {
-        zip.file(asset.mp4Filename, await readFile(asset.mp4Path));
+        mp4Folder!.file(asset.mp4Filename, await readFile(asset.mp4Path));
       }
     }
 

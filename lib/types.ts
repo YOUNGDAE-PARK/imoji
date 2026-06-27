@@ -1,3 +1,5 @@
+export type ModeId = "general" | "tennis";
+
 export type JobStatus = "queued" | "generating_final" | "completed" | "failed";
 
 export type AssetKind = "final";
@@ -32,6 +34,9 @@ export type GeneratedAsset = {
   path: string;
   mp4Filename?: string;
   mp4Path?: string;
+  thumbFilename?: string;
+  thumbPath?: string;
+  fileSizeKb?: number;
 };
 
 export type GenerationJob = {
@@ -42,6 +47,8 @@ export type GenerationJob = {
   letteringStyleId: string;
   letteringStyleLabel: string;
   letteringStylePrompt: string;
+  modeId: ModeId;
+  modeLabel: string;
   selectedSituationIds: string[];
   textOverlays?: TextOverlayMap;
   uploadPath: string;

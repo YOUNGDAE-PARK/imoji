@@ -1,12 +1,14 @@
 import situationData from "../data/situations.json";
+import tennisSituationData from "../data/situations_tennis.json";
+import type { ModeId } from "./types";
 
 export const STYLE_PRESETS = [
-  { id: "soft-sticker", label: "말랑 2D 스티커", prompt: "soft rounded 2D sticker, warm colors, clean readable silhouette" },
-  { id: "clean-line", label: "깔끔한 라인 캐릭터", prompt: "clean line character, minimal polished vector-like drawing" },
-  { id: "chibi", label: "귀여운 SD/치비", prompt: "cute super-deformed chibi mascot, large expressive face" },
-  { id: "watercolor", label: "손그림 수채화", prompt: "hand-drawn watercolor texture, gentle pencil and paint feeling" },
-  { id: "clay-toy", label: "클레이/토이 느낌", prompt: "clay toy character look, soft 3D handmade material" },
-  { id: "pixel", label: "픽셀 아트 이모티콘", prompt: "pixel art emoticon, crisp low-resolution pixel style, readable at small size" }
+  { id: "soft-sticker", label: "말랑 2D 스티커", emoji: "☁️", sampleDescription: "부드러운 곡선과 따뜻한 색감", prompt: "soft rounded 2D sticker, warm colors, clean readable silhouette" },
+  { id: "clean-line", label: "깔끔한 라인 캐릭터", emoji: "✏️", sampleDescription: "정교하고 세련된 벡터 스타일", prompt: "clean line character, minimal polished vector-like drawing" },
+  { id: "chibi", label: "귀여운 SD/치비", emoji: "👶", sampleDescription: "2등신의 귀여운 마스코트", prompt: "cute super-deformed chibi mascot, large expressive face" },
+  { id: "watercolor", label: "손그림 수채화", emoji: "🎨", sampleDescription: "은은한 연필선과 수채화 질감", prompt: "hand-drawn watercolor texture, gentle pencil and paint feeling" },
+  { id: "clay-toy", label: "클레이/토이 느낌", emoji: "🧸", sampleDescription: "폭신한 3D 점토 질감", prompt: "clay toy character look, soft 3D handmade material" },
+  { id: "pixel", label: "픽셀 아트 이모티콘", emoji: "👾", sampleDescription: "추억의 고전 게임 도트 스타일", prompt: "pixel art emoticon, crisp low-resolution pixel style, readable at small size" }
 ] as const;
 
 export type FinalSituation = {
@@ -20,6 +22,7 @@ export type FinalSituation = {
 };
 
 export const FINAL_SITUATIONS = situationData.situations as FinalSituation[];
+export const TENNIS_SITUATIONS = tennisSituationData.situations as FinalSituation[];
 export const GIF_FRAME_COUNT = 16;
 
 export const MIN_SELECTED_SITUATIONS = 1;
@@ -29,16 +32,25 @@ export const LETTERING_STYLES = [
   {
     id: "minimal-black",
     label: "담백 손글씨",
+    emoji: "✍️",
+    sampleDescription: "검은색 펜으로 쓴 간결한 느낌",
     prompt:
       "minimal black handwritten Korean lettering, thin marker or pencil-like strokes, sparse and witty placement, sometimes vertical or split around the character, no decorative font"
   },
   {
     id: "cute-color",
     label: "말랑 컬러 손글씨",
+    emoji: "✨",
+    sampleDescription: "알록달록하고 귀여운 장식 포함",
     prompt:
       "cute playful Korean handwritten lettering, rounded casual marker strokes, lively placement with small hearts, sparkles, and soft pastel accent marks, never a standard digital font"
   }
 ] as const;
+
+export const MODES: { id: ModeId; label: string; emoji: string; description: string; situations: FinalSituation[] }[] = [
+  { id: "general", label: "일반", emoji: "🎨", description: "내 캐릭터로 다양한 감정 이모지 생성", situations: FINAL_SITUATIONS },
+  { id: "tennis",  label: "테니스", emoji: "🎾", description: "테니스인을 위한 전용 액션 이모지", situations: TENNIS_SITUATIONS },
+];
 
 export const MAX_UPLOAD_BYTES = 8 * 1024 * 1024;
 export const ALLOWED_IMAGE_TYPES = ["image/png", "image/jpeg", "image/webp", "image/gif"];

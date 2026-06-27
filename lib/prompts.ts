@@ -26,10 +26,12 @@ export function buildGenerationPrompt({
     `SITUATION_ACTION: ${situationAnimationPrompt}`,
     `OUTPUT_FORMAT: Exactly 4×4 sprite sheet grid = 16 distinct animation frames in reading order (left-to-right, top-to-bottom)`,
     `TOTAL_ANIMATION_FRAMES: ${GIF_FRAME_COUNT}`,
-    "CRITICAL STABILITY: all 16 frames must show the SAME CHARACTER in completely stable, unchanging position, scale, and canvas anchoring",
-    "LOCK CHARACTER POSITION: all 16 frames must have identical canvas size, identical character centerline placement, and identical background handling — zero position drift allowed",
-    "ZERO JITTER: do not shift or wobble character position, size, or body anchor between frames; character must stay locked to center; only the pose/expression/gesture changes",
-    "SMOOTH LOOP CLOSURE: frame 16 must connect visually to frame 1 with zero jump, wobble, size shift, or position discontinuity",
+    "STRICT PIXEL ALIGNMENT: every frame must use the EXACT SAME CANVAS COORDINATES for the character's feet/base and torso",
+    "FIXED CHARACTER ANCHOR: the character's core mass must stay mathematically centered and frozen in place across all 16 frames — zero drift, zero scale shift, and zero jitter allowed",
+    "KEEP FEET PLANTED: the character's feet and lower body must remain in the exact same position in every single frame",
+    "STRICT BOTTOM ANCHOR: the bottom-most part of the character must never shift or wobble; only limbs, head, and facial features should change between frames",
+    "SMOOTH LERP MOTION: change only the specific limb or facial feature mentioned in each frame; the rest of the body must remain perfectly static and unchanged",
+    "LOOP CONTINUITY: frame 16 must be identical to frame 1 to ensure a seamless cycle",
     ...situationFrames.map((frame, index) => `FRAME_${index + 1}: ${frame}`),
     "based on this exact hand-drawn sketch uploaded by the user as reference image",
     `character identity lock: ${characterProfile}`,
@@ -43,6 +45,8 @@ export function buildGenerationPrompt({
     `post-processing lettering style, not for model rendering: ${letteringStylePrompt}`,
     "do not draw any letters, captions, speech bubbles, or text in the generated image",
     "simple readable sticker character with clear silhouette and opaque clean colors",
-    "transparent background or plain removable white background only; all character pixels must be fully colored and opaque; no scenery, props, or environmental elements"
+    "pure white background (#FFFFFF) only; no transparency, no colors, no gradients in the background",
+    "absolutely no borders, no frames, no background boxes, no panels, no ground shadows, no scenery, and no background plates",
+    "the character must be the only element in the frame, placed directly on the pure white background"
   ].join(", ");
 }

@@ -22,16 +22,35 @@ FONT_CANDIDATES = [
 ]
 
 
-def foreground_bbox(image):
+def get_background_color(image):
+    """Sample corners and edges to find the most likely background color."""
+    w, h = image.size
+    pixels = image.convert("RGB").load()
+    samples = [
+        pixels[0, 0], pixels[w-1, 0], pixels[0, h-1], pixels[w-1, h-1],
+        pixels[w//2, 0], pixels[w//2, h-1], pixels[0, h//2], pixels[w-1, h//2]
+    ]
+    # Use median to avoid outliers (like a character pixel touching the edge)
+    r = sorted([s[0] for s in samples])[len(samples)//2]
+    g = sorted([s[1] for s in samples])[len(samples)//2]
+    b = sorted([s[2] for s in samples])[len(samples)//2]
+    return (r, g, b)
+
+
+def foreground_bbox(image, tolerance=30):
     rgba = image.convert("RGBA")
     pixels = rgba.load()
     width, height = rgba.size
     points = []
+    bg_r, bg_g, bg_b = get_background_color(image)
 
     for y in range(height):
         for x in range(width):
             r, g, b, a = pixels[x, y]
-            is_background = a < 24 or (r > 238 and g > 238 and b > 238 and max(r, g, b) - min(r, g, b) < 20)
+            is_background = (
+                a < 32 or 
+                (abs(r - bg_r) < tolerance and abs(g - bg_g) < tolerance and abs(b - bg_b) < tolerance)
+            )
             if not is_background:
                 points.append((x, y))
 
@@ -43,16 +62,17 @@ def foreground_bbox(image):
     return (min(xs), min(ys), max(xs) + 1, max(ys) + 1)
 
 
-def remove_white_background(image, threshold=210, max_delta=30):
+def remove_white_background(image, tolerance=35):
     """모션 GIF의 흰색/밝은 배경 픽셀을 투명(alpha=0)으로 변환"""
     rgba = image.convert("RGBA")
     pixels = rgba.load()
     w, h = rgba.size
+    bg_r, bg_g, bg_b = get_background_color(image)
+
     for y in range(h):
         for x in range(w):
             r, g, b, a = pixels[x, y]
-            if a > 0 and r > threshold and g > threshold and b > threshold \
-               and max(r, g, b) - min(r, g, b) < max_delta:
+            if a > 0 and abs(r - bg_r) < tolerance and abs(g - bg_g) < tolerance and abs(b - bg_b) < tolerance:
                 pixels[x, y] = (r, g, b, 0)
     return rgba
 
