@@ -6,7 +6,7 @@ POC: KakaoTalk Emoji Generator
 실행: .venv/bin/python poc/run.py
 """
 
-import sys, os, math, json, base64, time, hashlib
+import sys, os, math, json, base64, time, hashlib, re
 from pathlib import Path
 
 ROOT = Path(__file__).parent.parent
@@ -197,8 +197,42 @@ EMOTION_KEYFRAMES = {
     ],
 }
 
-def _call_image_gen(base_b64: str, prompt: str) -> bytes | None:
-    """gemini-2.5-flash-image 호출, 이미지 bytes 반환. 실패시 None."""
+PARAMS_FALLBACK = {"hold_ms": 150, "dy": 0, "dx": 0, "shake_x": 0}
+
+# Imagen fallback 시 레이블 기반 규칙 (AI params를 얻지 못한 경우에만)
+_LABEL_RULES: dict[str, dict] = {
+    "ready":       {"hold_ms": 200, "dy":   0, "dx": 0, "shake_x": 0},
+    "squat":       {"hold_ms": 100, "dy":   8, "dx": 0, "shake_x": 0},
+    "leap":        {"hold_ms": 100, "dy": -15, "dx": 0, "shake_x": 0},
+    "peak":        {"hold_ms": 350, "dy": -22, "dx": 0, "shake_x": 0},
+    "descend":     {"hold_ms": 100, "dy":  -8, "dx": 0, "shake_x": 0},
+    "land":        {"hold_ms": 200, "dy":   0, "dx": 0, "shake_x": 0},
+    "neutral_sad": {"hold_ms": 200, "dy":   0, "dx": 0, "shake_x": 0},
+    "cry_start":   {"hold_ms": 100, "dy":   0, "dx": 0, "shake_x": 0},
+    "arm_raise":   {"hold_ms": 100, "dy":   0, "dx": 0, "shake_x": 0},
+    "wipe":        {"hold_ms": 400, "dy":   0, "dx": 0, "shake_x": 6},
+    "arm_lower":   {"hold_ms": 100, "dy":   0, "dx": 0, "shake_x": 0},
+    "slump":       {"hold_ms": 400, "dy":   0, "dx": 0, "shake_x": 0},
+}
+
+def _parse_params(text: str) -> dict:
+    """Gemini 텍스트에서 params JSON 추출. 실패 시 PARAMS_FALLBACK."""
+    m = re.search(r'\{[^{}]*"hold_ms"[^{}]*\}', text) or re.search(r'\{[\s\S]*?\}', text)
+    if m:
+        try:
+            p = json.loads(m.group())
+            return {
+                "hold_ms": max(50, min(600, int(p.get("hold_ms", 150)))),
+                "dy":      max(-30, min(30,  int(p.get("dy",      0)))),
+                "dx":      max(-10, min(10,  int(p.get("dx",      0)))),
+                "shake_x": max(0,   min(12,  int(p.get("shake_x", 0)))),
+            }
+        except (json.JSONDecodeError, ValueError, TypeError):
+            pass
+    return PARAMS_FALLBACK.copy()
+
+def _call_image_gen_with_params(base_b64: str, prompt: str) -> tuple[bytes | None, dict | None]:
+    """gemini-2.5-flash-image 호출 → (이미지 bytes, params dict). 실패 시 (None, None)."""
     try:
         resp = client.models.generate_content(
             model=IMAGE_GEN_MODEL,
@@ -208,13 +242,18 @@ def _call_image_gen(base_b64: str, prompt: str) -> bytes | None:
             ],
             config=gtypes.GenerateContentConfig(response_modalities=["TEXT", "IMAGE"]),
         )
+        img_bytes, text_parts = None, []
         for part in resp.candidates[0].content.parts:
             if part.inline_data and part.inline_data.data:
                 raw = part.inline_data.data
-                return base64.b64decode(raw) if isinstance(raw, str) else bytes(raw)
+                img_bytes = base64.b64decode(raw) if isinstance(raw, str) else bytes(raw)
+            elif part.text:
+                text_parts.append(part.text)
+        params = _parse_params(" ".join(text_parts)) if text_parts else None
+        return img_bytes, params
     except Exception as e:
         print(f"    image_gen 오류: {e}")
-    return None
+        return None, None
 
 def _call_imagen_fallback(prompt: str) -> bytes:
     """Imagen 텍스트 전용 폴백."""
@@ -234,22 +273,38 @@ def _prompt_hash(dna: dict, colors: dict, kf: dict) -> str:
     return hashlib.md5(key.encode()).hexdigest()[:8]
 
 
-def generate_keyframes(emotion: str, dna: dict, base_path: Path, colors: dict) -> list[Path]:
-    """4개 키프레임 이미지 생성. 각각 구체적인 액션 순간."""
-    print(f"\n[Stage 3] '{emotion}' 키프레임 4장 생성 중...")
+_PARAMS_REQUEST = (
+    '\n\nAfter the image, output ONLY this JSON (no markdown, no extra text):\n'
+    '{"hold_ms": <100-400>, "dy": <-30 to 30, negative=up>, '
+    '"dx": <-10 to 10>, "shake_x": <0 or 3-8>}\n\n'
+    'Guidelines:\n'
+    '- hold_ms: 300-400 for key emotion moments (peak/wipe), 100-150 for transition frames\n'
+    '- dy: negative for airborne frames (in air), positive for crouching (going down), 0 for ground contact\n'
+    '- shake_x: non-zero ONLY for vibrating actions (wiping tears, shaking head); typical 4-6'
+)
+
+def generate_keyframes(emotion: str, dna: dict, base_path: Path, colors: dict) -> list[tuple[Path, dict]]:
+    """키프레임 이미지 + animation params 동시 생성.
+    반환: [(path, params), ...] — Stage 4가 하드코딩 없이 직접 소비.
+    """
+    print(f"\n[Stage 3] '{emotion}' 키프레임 생성 중...")
     base_b64 = base64.b64encode(base_path.read_bytes()).decode()
     kfs = EMOTION_KEYFRAMES[emotion]
-    paths = []
+    kf_data = []
 
     for i, kf in enumerate(kfs):
-        out = OUTPUT_DIR / f"{emotion}_kf{i+1}_{kf['label']}.png"
-        hash_file = OUTPUT_DIR / f"{emotion}_kf{i+1}_{kf['label']}.hash"
+        out         = OUTPUT_DIR / f"{emotion}_kf{i+1}_{kf['label']}.png"
+        hash_file   = OUTPUT_DIR / f"{emotion}_kf{i+1}_{kf['label']}.hash"
+        params_file = OUTPUT_DIR / f"{emotion}_kf{i+1}_{kf['label']}.params.json"
         current_hash = _prompt_hash(dna, colors, kf)
 
-        # 캐시: 파일 존재 + 해시 일치 시 스킵 (프롬프트 변경 시 무효화)
-        if out.exists() and hash_file.exists() and hash_file.read_text().strip() == current_hash:
-            print(f"  [{i+1}/{len(kfs)}] {kf['label']}: 캐시 사용")
-            paths.append(out)
+        # 캐시: PNG + 해시 + params 세 파일 모두 존재해야 히트
+        if (out.exists() and hash_file.exists()
+                and hash_file.read_text().strip() == current_hash
+                and params_file.exists()):
+            params = json.loads(params_file.read_text())
+            print(f"  [{i+1}/{len(kfs)}] {kf['label']}: 캐시 사용  params={params}")
+            kf_data.append((out, params))
             continue
 
         print(f"  [{i+1}/{len(kfs)}] {kf['label']}: {kf['desc'][:60]}...")
@@ -264,36 +319,42 @@ def generate_keyframes(emotion: str, dna: dict, base_path: Path, colors: dict) -
         )
         prompt = (
             f"Draw the EXACT SAME character as in the reference image. "
-            f"Character identity: {dna['body_shape']}, {dna['head_features']}, unique details: {dna.get('unique_details', 'small curly tail')}. "
+            f"Character identity: {dna['body_shape']}, {dna['head_features']}, "
+            f"unique details: {dna.get('unique_details', 'small curly tail')}. "
             f"{color_lock}"
             f"ONLY change the pose/expression to: {kf['desc']}. "
             f"Keep ALL proportions, outline thickness, and art style identical to the reference. "
             f"KakaoTalk sticker style: thick outlines, flat colors, pure flat white background, "
             f"no shadow, no drop shadow, centered, square composition. No text, no background elements."
+            f"{_PARAMS_REQUEST}"
         )
 
-        img_bytes = _call_image_gen(base_b64, prompt)
+        img_bytes, params = _call_image_gen_with_params(base_b64, prompt)
 
         if img_bytes is None:
-            print(f"    ⚠ 폴백 → Imagen")
-            # 폴백: base_prompt + 키프레임 동작 설명
+            print(f"    ⚠ 폴백 → Imagen (params는 레이블 규칙 사용)")
             fallback_prompt = (
                 f"{dna['base_prompt']} Action: {kf['desc']}. "
                 f"Body color {colors.get('body','#F5F0E8')}, outline {colors.get('outline','#2A2A2A')}, "
                 "KakaoTalk sticker, thick outlines, flat colors, white background, no text."
             )
             img_bytes = _call_imagen_fallback(fallback_prompt)
+            params = _LABEL_RULES.get(kf["label"], PARAMS_FALLBACK.copy())
+        elif params is None:
+            print(f"    ⚠ params 파싱 실패 → 레이블 규칙 사용")
+            params = _LABEL_RULES.get(kf["label"], PARAMS_FALLBACK.copy())
 
+        print(f"    params: {params}")
         out.write_bytes(img_bytes)
         hash_file.write_text(current_hash)
+        params_file.write_text(json.dumps(params, ensure_ascii=False))
         print(f"    저장: {out.name}")
-        paths.append(out)
+        kf_data.append((out, params))
 
-        # Gemini rate limit 방지
         if i < len(kfs) - 1:
             time.sleep(1.5)
 
-    return paths
+    return kf_data
 
 
 # ═════════════════════════════════════════════════════════════════════════════
@@ -376,20 +437,14 @@ def _shift_canvas(img: Image.Image, dy: int, dx: int = 0) -> Image.Image:
     return Image.fromarray(result)
 
 
-def animate_from_keyframes(
-    emotion: str,
-    kf_paths: list[Path],
-    hold_frames: list[int],
-    transition_frames: list[int],
-    shift_offsets: list[tuple[int, int]] | None = None,
-    shake_holds: list[int] | None = None,
-) -> Path:
+def animate_from_keyframes(emotion: str, kf_data: list[tuple[Path, dict]]) -> Path:
     """
-    shift_offsets : (dy, dx) per keyframe — blend 없이 위치 이동으로 in-between 생성
-    shake_holds   : x-진폭 per keyframe — hold 구간 좌우 진동 (0이면 미적용)
+    kf_data: [(path, params), ...]
+    params keys: hold_ms, dy, dx, shake_x — AI가 생성한 값을 그대로 사용.
+    하드코딩된 hold_frames / shift_offsets / shake_holds 없음.
     """
     print(f"\n[Stage 4] '{emotion}' GIF 생성 중...")
-    kf_images = [_load_kf(p) for p in kf_paths]
+    kf_images = [_load_kf(p) for p, _ in kf_data]
     n = len(kf_images)
     frame_ms = 1000 // FPS
 
@@ -397,16 +452,17 @@ def animate_from_keyframes(
     durations_out: list[int] = []
 
     for i in range(n):
-        kf_cur = kf_images[i]
-        hold   = hold_frames[i % len(hold_frames)]
-        trans  = transition_frames[i % len(transition_frames)]
+        kf_cur    = kf_images[i]
+        params    = kf_data[i][1]
+        p_next    = kf_data[(i + 1) % n][1]
 
-        dy_cur, dx_cur = shift_offsets[i % len(shift_offsets)] if shift_offsets else (0, 0)
-        dy_nxt, dx_nxt = shift_offsets[(i + 1) % len(shift_offsets)] if shift_offsets else (0, 0)
-        shake_amp = shake_holds[i % len(shake_holds)] if shake_holds else 0
+        hold_count = max(1, params["hold_ms"] // frame_ms)
+        dy_cur, dx_cur = params["dy"], params["dx"]
+        dy_nxt, dx_nxt = p_next["dy"],  p_next["dx"]
+        shake_amp = params["shake_x"]
 
-        # 홀드: 선택적 x-shake (손 닦기 등 좌우 동작 표현)
-        for k in range(hold):
+        # 홀드: AI가 지정한 hold_ms 만큼, shake_x 적용
+        for k in range(hold_count):
             if shake_amp and k % 2 == 1:
                 sign = -1 if (k % 4) < 2 else 1
                 frame = _shift_canvas(kf_cur, dy_cur, dx_cur + shake_amp * sign)
@@ -415,14 +471,11 @@ def animate_from_keyframes(
             frames_out.append(frame)
             durations_out.append(frame_ms)
 
-        # 전환: shift 보간 — kf_cur 이미지를 nxt 위치로 이동 (blend 잔상 없음)
-        if trans > 0:
-            for j in range(trans):
-                t = (j + 1) / (trans + 1)
-                dy_t = int(dy_cur + (dy_nxt - dy_cur) * t)
-                dx_t = int(dx_cur + (dx_nxt - dx_cur) * t)
-                frames_out.append(_shift_canvas(kf_cur, dy_t, dx_t))
-                durations_out.append(frame_ms)
+        # 전환: 1프레임 shift 보간 (blend 없음 → 잔상 없음)
+        dy_t = (dy_cur + dy_nxt) // 2
+        dx_t = (dx_cur + dx_nxt) // 2
+        frames_out.append(_shift_canvas(kf_cur, dy_t, dx_t))
+        durations_out.append(frame_ms)
 
     out = OUTPUT_DIR / f"{emotion}.gif"
     pil_frames = [f.convert("P", palette=Image.ADAPTIVE, colors=128) for f in frames_out]
@@ -474,27 +527,12 @@ if __name__ == "__main__":
     print(f"  베이스 bbox: {BASE_CHAR_BBOX}")
 
     # ── 기쁨 ────────────────────────────────────────────────────────────────
-    joy_kfs = generate_keyframes("joy", dna, base_path, colors)
-    animate_from_keyframes(
-        emotion           = "joy",
-        kf_paths          = joy_kfs,
-        hold_frames       = [2, 1, 1, 3, 1, 2],   # sum=10 + trans=5 → 15프레임
-        transition_frames = [1, 1, 1, 1, 1, 0],
-        # ready=기준, squat=+8(무릎굽힘↓), leap=-15(공중↑), peak=-22(최고점↑), descend=-8(하강), land=0
-        shift_offsets     = [(0,0), (8,0), (-15,0), (-22,0), (-8,0), (0,0)],
-        shake_holds       = None,
-    )
+    joy_kf_data = generate_keyframes("joy", dna, base_path, colors)
+    animate_from_keyframes("joy", joy_kf_data)
 
     # ── 슬픔 ────────────────────────────────────────────────────────────────
-    sad_kfs = generate_keyframes("sadness", dna, base_path, colors)
-    animate_from_keyframes(
-        emotion           = "sadness",
-        kf_paths          = sad_kfs,
-        hold_frames       = [2, 1, 1, 4, 1, 4],   # sum=13 + trans=1 → 14프레임
-        transition_frames = [0, 0, 1, 0, 0, 0],   # arm_raise→wipe 구간만 전환
-        shift_offsets     = [(0,0), (0,0), (0,0), (0,0), (0,0), (0,0)],
-        shake_holds       = [0, 0, 0, 6, 0, 0],   # wipe 구간 ±6px x-진동
-    )
+    sad_kf_data = generate_keyframes("sadness", dna, base_path, colors)
+    animate_from_keyframes("sadness", sad_kf_data)
 
     print("\n" + "=" * 52)
     print("  완료! poc/output/ 에서 결과 확인")
