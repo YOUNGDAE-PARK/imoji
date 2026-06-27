@@ -394,6 +394,32 @@ def generate_keyframes(emotion: str, dna: dict, base_path: Path, colors: dict) -
 # ═════════════════════════════════════════════════════════════════════════════
 SIZE = 360
 FPS  = 10  # 100ms/frame
+FONT_PATH = Path.home() / ".fonts" / "NanumPenScript.ttf"
+
+# 감정별 텍스트 오버레이 설정
+EMOTION_TEXT: dict[str, dict] = {
+    "joy": {
+        "text": "야호!",
+        "color": (255, 110, 0),   # 주황
+        "size":  54,
+        "rotation": -8,
+        "anchor": "bottom_right",  # 우측 하단
+    },
+    "sadness": {
+        "text": "흑흑...",
+        "color": (55, 115, 200),  # 파랑
+        "size":  46,
+        "rotation": 5,
+        "anchor": "bottom_center",
+    },
+    "surprise": {
+        "text": "헉!",
+        "color": (210, 30, 30),   # 빨강
+        "size":  64,
+        "rotation": -12,
+        "anchor": "bottom_right",
+    },
+}
 
 BASE_CHAR_BBOX: tuple | None = None  # (top, bottom, left, right)
 
@@ -446,6 +472,42 @@ def _load_kf(path: Path) -> Image.Image:
 
     return canvas
 
+def _draw_emotion_text(canvas: Image.Image, cfg: dict) -> Image.Image:
+    """손글씨체 감정 텍스트를 캔버스 하단에 오버레이."""
+    from PIL import ImageDraw, ImageFont
+    font = ImageFont.truetype(str(FONT_PATH), cfg["size"])
+    text, color, rotation, anchor = cfg["text"], cfg["color"], cfg["rotation"], cfg["anchor"]
+
+    # 텍스트 크기 측정
+    tmp_draw = ImageDraw.Draw(Image.new("RGBA", (1, 1)))
+    bb = tmp_draw.textbbox((0, 0), text, font=font)
+    tw, th = bb[2] - bb[0], bb[3] - bb[1]
+
+    # 텍스트 → RGBA 레이어 (흰 외곽선 + 본색)
+    pad = 12
+    layer = Image.new("RGBA", (tw + pad * 2, th + pad * 2), (0, 0, 0, 0))
+    d = ImageDraw.Draw(layer)
+    for ox, oy in [(-3,0),(3,0),(0,-3),(0,3),(-2,-2),(2,-2),(-2,2),(2,2)]:
+        d.text((pad + ox, pad + oy), text, font=font, fill=(255, 255, 255, 200))
+    d.text((pad, pad), text, font=font, fill=(*color, 255))
+
+    rotated = layer.rotate(rotation, expand=True, resample=Image.BICUBIC)
+    rw, rh = rotated.size
+
+    # 앵커 위치 계산 (캐릭터 영역 아래 ~40px 여백)
+    margin = 12
+    if anchor == "bottom_right":
+        x, y = SIZE - rw - margin, SIZE - rh - margin
+    elif anchor == "bottom_center":
+        x, y = (SIZE - rw) // 2, SIZE - rh - margin
+    else:  # bottom_left
+        x, y = margin, SIZE - rh - margin
+
+    result = canvas.convert("RGBA")
+    result.paste(rotated, (x, y), rotated)
+    return result.convert("RGB")
+
+
 def _shift_canvas(img: Image.Image, dy: int, dx: int = 0) -> Image.Image:
     """캐릭터를 dy(아래+/위-), dx(오른쪽+/왼쪽-) 픽셀 이동. 빈 영역 흰색."""
     if dy == 0 and dx == 0:
@@ -493,6 +555,8 @@ def animate_from_keyframes(emotion: str, kf_data: list[tuple[Path, dict]]) -> Pa
         dy_nxt, dx_nxt = p_next["dy"],  p_next["dx"]
         shake_amp = params["shake_x"]
 
+        text_cfg = EMOTION_TEXT.get(emotion)
+
         # 홀드: AI가 지정한 hold_ms 만큼, shake_x 적용
         for k in range(hold_count):
             if shake_amp and k % 2 == 1:
@@ -500,13 +564,18 @@ def animate_from_keyframes(emotion: str, kf_data: list[tuple[Path, dict]]) -> Pa
                 frame = _shift_canvas(kf_cur, dy_cur, dx_cur + shake_amp * sign)
             else:
                 frame = _shift_canvas(kf_cur, dy_cur, dx_cur)
+            if text_cfg:
+                frame = _draw_emotion_text(frame, text_cfg)
             frames_out.append(frame)
             durations_out.append(frame_ms)
 
         # 전환: 1프레임 shift 보간 (blend 없음 → 잔상 없음)
         dy_t = (dy_cur + dy_nxt) // 2
         dx_t = (dx_cur + dx_nxt) // 2
-        frames_out.append(_shift_canvas(kf_cur, dy_t, dx_t))
+        trans_frame = _shift_canvas(kf_cur, dy_t, dx_t)
+        if text_cfg:
+            trans_frame = _draw_emotion_text(trans_frame, text_cfg)
+        frames_out.append(trans_frame)
         durations_out.append(frame_ms)
 
     out = OUTPUT_DIR / f"{emotion}.gif"
