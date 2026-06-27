@@ -195,6 +195,32 @@ EMOTION_KEYFRAMES = {
             "desc": "arm fully lowered, shoulders drooped, head slightly bowed, tears on cheeks, dejected slumped posture, arms hanging limp",
         },
     ],
+    "surprise": [
+        {
+            "label": "calm",
+            "desc": "standing relaxed, neutral calm expression, arms at sides, eyes half-open, peaceful look",
+        },
+        {
+            "label": "notice",
+            "desc": "eyes beginning to widen, eyebrows raising, mouth slightly open, body stiffening, something caught attention",
+        },
+        {
+            "label": "shock",
+            "desc": "full shock reaction, eyes extremely wide and round (O_O), mouth wide open in a large O shape, body jerking backward slightly, eyebrows raised to top of head, pure white background, no shadow",
+        },
+        {
+            "label": "hands_cheeks",
+            "desc": "both hands/paws pressed against cheeks in Home Alone style, eyes huge and round, mouth wide open O, body upright, yellow exclamation marks and stars bursting around head, no shadow",
+        },
+        {
+            "label": "settle",
+            "desc": "hands starting to lower from cheeks, eyes still wide but calming, mouth half-closed, body steadying, still surprised but recovering",
+        },
+        {
+            "label": "recover",
+            "desc": "arms returning to sides, eyes back to normal size with surprised/amused look, small smile forming, body relaxed, tiny sweat drop on forehead",
+        },
+    ],
 }
 
 PARAMS_FALLBACK = {"hold_ms": 150, "dy": 0, "dx": 0, "shake_x": 0}
@@ -213,6 +239,12 @@ _LABEL_RULES: dict[str, dict] = {
     "wipe":        {"hold_ms": 400, "dy":   0, "dx": 0, "shake_x": 6},
     "arm_lower":   {"hold_ms": 100, "dy":   0, "dx": 0, "shake_x": 0},
     "slump":       {"hold_ms": 400, "dy":   0, "dx": 0, "shake_x": 0},
+    "calm":        {"hold_ms": 200, "dy":   0, "dx": 0, "shake_x": 0},
+    "notice":      {"hold_ms": 100, "dy":   0, "dx": 0, "shake_x": 0},
+    "shock":       {"hold_ms": 150, "dy":  -8, "dx": 0, "shake_x": 4},
+    "hands_cheeks":{"hold_ms": 400, "dy":  -5, "dx": 0, "shake_x": 5},
+    "settle":      {"hold_ms": 150, "dy":   0, "dx": 0, "shake_x": 0},
+    "recover":     {"hold_ms": 300, "dy":   0, "dx": 0, "shake_x": 0},
 }
 
 def _parse_params(text: str) -> dict:
@@ -533,6 +565,10 @@ if __name__ == "__main__":
     # ── 슬픔 ────────────────────────────────────────────────────────────────
     sad_kf_data = generate_keyframes("sadness", dna, base_path, colors)
     animate_from_keyframes("sadness", sad_kf_data)
+
+    # ── 놀람 ────────────────────────────────────────────────────────────────
+    surprise_kf_data = generate_keyframes("surprise", dna, base_path, colors)
+    animate_from_keyframes("surprise", surprise_kf_data)
 
     print("\n" + "=" * 52)
     print("  완료! poc/output/ 에서 결과 확인")
